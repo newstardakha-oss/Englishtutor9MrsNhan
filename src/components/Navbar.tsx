@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { BookOpen, Bot, Award, Sparkles, AlertCircle, FileText, Zap, Volume2, VolumeX, Swords, Menu, X, ChevronRight } from 'lucide-react';
+import { BookOpen, Bot, Award, Sparkles, AlertCircle, FileText, Zap, Volume2, VolumeX, Swords, Menu, X, ChevronRight, User, ShieldCheck, Trophy, LogOut } from 'lucide-react';
+import { StudentProfile } from '../types';
 
 interface NavbarProps {
   activeTab: string;
@@ -8,6 +9,11 @@ interface NavbarProps {
   setSelectedUnit: (unit: number) => void;
   ttsEnabled: boolean;
   setTtsEnabled: (enabled: boolean) => void;
+  currentStudent: StudentProfile | null;
+  onOpenAuthModal: () => void;
+  onOpenLeaderboardModal: () => void;
+  onOpenTeacherAdminPortal: () => void;
+  onLogoutStudent: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -17,6 +23,11 @@ export const Navbar: React.FC<NavbarProps> = ({
   setSelectedUnit,
   ttsEnabled,
   setTtsEnabled,
+  currentStudent,
+  onOpenAuthModal,
+  onOpenLeaderboardModal,
+  onOpenTeacherAdminPortal,
+  onLogoutStudent,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -162,6 +173,59 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
           </div>
 
+          {/* Student Auth & Leaderboard Card Box */}
+          <div className="space-y-2">
+            {currentStudent ? (
+              <div className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-3 rounded-2xl border-2 border-blue-300 shadow-[0_4px_0_#1d4ed8] space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center font-black text-base">
+                      👤
+                    </div>
+                    <div>
+                      <p className="font-black text-xs">{currentStudent.fullName}</p>
+                      <p className="text-[10px] text-blue-200">{currentStudent.className} • {currentStudent.schoolName}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={onLogoutStudent}
+                    title="Đăng xuất tài khoản"
+                    className="p-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-white font-bold"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                <div className="flex justify-between text-[10px] bg-black/20 px-2.5 py-1 rounded-xl font-mono">
+                  <span>⏱️ {currentStudent.totalStudyMinutes} phút học</span>
+                  <span>🏆 {currentStudent.examHighestScore}đ</span>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={onOpenAuthModal}
+                className="w-full py-2.5 bg-blue-600 text-white font-black rounded-2xl text-xs shadow-[0_4px_0_#1d4ed8] hover:bg-blue-500 active:translate-y-0.5 active:shadow-none transition-all flex items-center justify-center gap-1.5 border-2 border-blue-300"
+              >
+                <User className="w-4 h-4 text-amber-300" />
+                <span>👤 ĐĂNG NHẬP / ĐĂNG KÝ HỌC SINH</span>
+              </button>
+            )}
+
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={onOpenLeaderboardModal}
+                className="py-2 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black rounded-xl text-[11px] shadow-[0_3px_0_#d97706] flex items-center justify-center gap-1 border border-amber-500 active:translate-y-0.5"
+              >
+                <Trophy className="w-3.5 h-3.5" /> Bảng Thi Đua
+              </button>
+              <button
+                onClick={onOpenTeacherAdminPortal}
+                className="py-2 bg-purple-600 hover:bg-purple-500 text-white font-black rounded-xl text-[11px] shadow-[0_3px_0_#6b21a8] flex items-center justify-center gap-1 border border-purple-400 active:translate-y-0.5"
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-amber-300" /> Quản Trị GV
+              </button>
+            </div>
+          </div>
+
           {/* Unit Selector & Sound 3D Box Controls */}
           <div className="bg-white p-3 rounded-2xl border-2 border-amber-200 shadow-[0_4px_0_#fde68a] space-y-2 text-xs">
             <div className="flex items-center justify-between">
@@ -201,7 +265,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span className="text-[10px] text-pink-600 font-bold">8 Hộp 3D</span>
             </p>
 
-            <nav className="space-y-2.5">
+            <nav className="space-y-2">
               {tabs.map((tab) => {
                 const isActive = activeTab === tab.id;
 
@@ -212,21 +276,21 @@ export const Navbar: React.FC<NavbarProps> = ({
                       setActiveTab(tab.id);
                       setMobileMenuOpen(false);
                     }}
-                    className={`w-full p-3 rounded-2xl text-xs font-black transition-all flex items-center justify-between border-2 cursor-pointer active:translate-y-1 active:shadow-none ${
+                    className={`w-full p-2.5 rounded-2xl text-xs font-black transition-all flex items-center justify-between border-2 cursor-pointer active:translate-y-1 active:shadow-none ${
                       isActive
                         ? `bg-gradient-to-r ${tab.activeGradient} text-white border-white/90 ${tab.activeShadow} translate-y-[-2px] ring-2 ring-amber-300/80`
-                        : `bg-gradient-to-b from-white via-amber-50/40 to-slate-50 text-slate-800 ${tab.inactiveBorder} shadow-[0_5px_0_#cbd5e1] hover:shadow-[0_7px_0_#94a3b8] hover:translate-y-[-2px]`
+                        : `bg-gradient-to-b from-white via-amber-50/40 to-slate-50 text-slate-800 ${tab.inactiveBorder} shadow-[0_4px_0_#cbd5e1] hover:shadow-[0_6px_0_#94a3b8] hover:translate-y-[-2px]`
                     }`}
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2.5">
                       <span className="text-xl leading-none drop-shadow-xs">{tab.emoji}</span>
                       <span className="tracking-tight text-left leading-tight">{tab.label}</span>
                     </div>
 
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1">
                       {tab.badge && (
                         <span
-                          className={`text-[9px] px-2 py-0.5 rounded-full font-black uppercase tracking-wider border ${
+                          className={`text-[9px] px-1.5 py-0.5 rounded-full font-black uppercase tracking-wider border ${
                             isActive
                               ? 'bg-amber-300 text-slate-950 border-amber-400 shadow-xs'
                               : tab.badgeBg

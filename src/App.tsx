@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
 import { TutorChat } from './components/TutorChat';
 import { UnitExplorer } from './components/UnitExplorer';
@@ -8,6 +8,11 @@ import { VocabBattleGame } from './components/VocabBattleGame';
 import { ExamSimulator } from './components/ExamSimulator';
 import { WritingSpeakingLab } from './components/WritingSpeakingLab';
 import { DiagnosticStudio } from './components/DiagnosticStudio';
+import { StudentAuthModal } from './components/StudentAuthModal';
+import { StudentLeaderboardModal } from './components/StudentLeaderboardModal';
+import { TeacherAdminPortal } from './components/TeacherAdminPortal';
+import { getCurrentStudent, logoutStudent, updateStudentProgress } from './utils/auth';
+import { StudentProfile } from './types';
 import { Heart, Sparkles, Star } from 'lucide-react';
 
 export default function App() {
@@ -15,8 +20,35 @@ export default function App() {
   const [selectedUnit, setSelectedUnit] = useState<number>(1);
   const [ttsEnabled, setTtsEnabled] = useState<boolean>(true);
 
+  // Student Auth & Admin Modals State
+  const [currentStudent, setCurrentStudent] = useState<StudentProfile | null>(() => getCurrentStudent());
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [leaderboardModalOpen, setLeaderboardModalOpen] = useState(false);
+  const [teacherAdminPortalOpen, setTeacherAdminPortalOpen] = useState(false);
+
+  // Track study time every 60 seconds when student is logged in
+  useEffect(() => {
+    if (!currentStudent) return;
+
+    const timer = setInterval(() => {
+      updateStudentProgress({ studyMinutesToAdd: 1 });
+      setCurrentStudent(getCurrentStudent());
+    }, 60000);
+
+    return () => clearInterval(timer);
+  }, [currentStudent]);
+
   const handleAskTutor = (query: string) => {
     setActiveTab('chat');
+  };
+
+  const handleStudentAuthSuccess = (student: StudentProfile) => {
+    setCurrentStudent(student);
+  };
+
+  const handleLogout = () => {
+    logoutStudent();
+    setCurrentStudent(null);
   };
 
   return (
@@ -35,6 +67,11 @@ export default function App() {
         setSelectedUnit={setSelectedUnit}
         ttsEnabled={ttsEnabled}
         setTtsEnabled={setTtsEnabled}
+        currentStudent={currentStudent}
+        onOpenAuthModal={() => setAuthModalOpen(true)}
+        onOpenLeaderboardModal={() => setLeaderboardModalOpen(true)}
+        onOpenTeacherAdminPortal={() => setTeacherAdminPortalOpen(true)}
+        onLogoutStudent={handleLogout}
       />
 
       {/* Right Main Content Area */}
@@ -48,8 +85,23 @@ export default function App() {
             <span className="font-extrabold text-slate-800">Gia Sư Tiếng Anh Lớp 9 • Created by Mrs Nhan DakHa</span>
           </div>
 
-          <div className="flex items-center gap-2 text-amber-900 font-bold bg-amber-100/90 px-3 py-1 rounded-xl border border-amber-300/80 shadow-xs">
-            <span>✨ Đang học: Unit {selectedUnit}</span>
+          <div className="flex items-center gap-3">
+            {currentStudent ? (
+              <span className="bg-emerald-100 text-emerald-950 border border-emerald-300 font-bold px-2.5 py-1 rounded-xl text-[11px]">
+                👤 {currentStudent.fullName} ({currentStudent.className})
+              </span>
+            ) : (
+              <button
+                onClick={() => setAuthModalOpen(true)}
+                className="bg-blue-600 hover:bg-blue-500 text-white font-black px-3 py-1 rounded-xl text-[11px] shadow-xs"
+              >
+                🔑 Đăng Nhập Học Sinh
+              </button>
+            )}
+
+            <div className="flex items-center gap-2 text-amber-900 font-bold bg-amber-100/90 px-3 py-1 rounded-xl border border-amber-300/80 shadow-xs">
+              <span>✨ Unit {selectedUnit}</span>
+            </div>
           </div>
         </header>
 
@@ -120,6 +172,23 @@ export default function App() {
           </div>
         </footer>
       </div>
+
+      {/* Modals */}
+      <StudentAuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        onSuccess={handleStudentAuthSuccess}
+      />
+
+      <StudentLeaderboardModal
+        isOpen={leaderboardModalOpen}
+        onClose={() => setLeaderboardModalOpen(false)}
+      />
+
+      <TeacherAdminPortal
+        isOpen={teacherAdminPortalOpen}
+        onClose={() => setTeacherAdminPortalOpen(false)}
+      />
     </div>
   );
 }

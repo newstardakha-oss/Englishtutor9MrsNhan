@@ -131,3 +131,26 @@ export interface ChatMessage {
   hasHints?: boolean;
   hints?: { level1: string; level2: string; level3: string };
 }
+
+export interface StudentProfile {
+  id: string;
+  fullName: string;
+  className: string;
+  schoolName: string;
+  wardCommune: string;
+  username: string;
+  passwordHash: string;
+  createdAt: string;
+  lastActiveAt: string;
+  totalStudyMinutes: number;
+  masteredVocabCount: number;
+  completedExercisesCount: number;
+  examHighestScore: number;
+}
+
+export interface TeacherAdminState {
+  email: 'hoangnhancva86@gmail.com';
+  isLoggedIn: boolean;
+  googleSheetsUrl?: string;
+}
+
