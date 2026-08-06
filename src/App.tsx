@@ -20,13 +20,14 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#fefcf6] via-[#f7f2fc] to-[#eef4ff] text-slate-800 flex font-sans selection:bg-pink-200 selection:text-pink-900 relative">
-      {/* Decorative Chibi Pastel Background Blurs */}
-      <div className="fixed top-12 left-64 w-80 h-80 bg-purple-200/30 rounded-full blur-3xl pointer-events-none" />
-      <div className="fixed bottom-12 right-12 w-96 h-96 bg-pink-200/30 rounded-full blur-3xl pointer-events-none" />
-      <div className="fixed top-1/2 right-1/3 w-72 h-72 bg-amber-200/20 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-amber-100/70 via-pink-100/50 to-blue-100/60 text-slate-800 flex font-sans selection:bg-pink-200 selection:text-pink-900 relative overflow-x-hidden">
+      {/* Soft Watercolor Loang Texture Spots */}
+      <div className="fixed -top-10 -left-10 w-96 h-96 bg-amber-200/40 rounded-full blur-3xl pointer-events-none mix-blend-multiply" />
+      <div className="fixed top-1/4 right-0 w-[500px] h-[500px] bg-pink-200/35 rounded-full blur-3xl pointer-events-none mix-blend-multiply" />
+      <div className="fixed bottom-0 left-1/3 w-[600px] h-[600px] bg-sky-200/40 rounded-full blur-3xl pointer-events-none mix-blend-multiply" />
+      <div className="fixed bottom-10 right-10 w-80 h-80 bg-purple-200/30 rounded-full blur-3xl pointer-events-none mix-blend-multiply" />
 
-      {/* Left Vertical Pastel 3D Sidebar */}
+      {/* Left Vertical 3D Box Pastel Sidebar */}
       <Navbar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -38,17 +39,17 @@ export default function App() {
 
       {/* Right Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 min-h-screen relative z-10">
-        {/* Top Soft Pastel Banner */}
-        <header className="bg-amber-100/60 border-b border-amber-200/80 px-6 py-2.5 flex items-center justify-between text-xs">
+        {/* Top Watercolor Soft Banner */}
+        <header className="bg-white/70 backdrop-blur-md border-b-2 border-amber-200/80 px-6 py-2.5 flex items-center justify-between text-xs shadow-xs">
           <div className="flex items-center gap-2 font-bold text-amber-950">
             <span className="bg-amber-300 text-amber-950 font-black px-2.5 py-0.5 rounded-full text-[10px] uppercase shadow-xs">
               GLOBAL SUCCESS 9
             </span>
-            <span>Gia Sư Tiếng Anh Lớp 9 • Created by Mrs Nhan DakHa</span>
+            <span className="font-extrabold text-slate-800">Gia Sư Tiếng Anh Lớp 9 • Created by Mrs Nhan DakHa</span>
           </div>
 
-          <div className="flex items-center gap-2 text-amber-900 font-semibold">
-            <span>✨ Bài học: Unit {selectedUnit}</span>
+          <div className="flex items-center gap-2 text-amber-900 font-bold bg-amber-100/90 px-3 py-1 rounded-xl border border-amber-300/80 shadow-xs">
+            <span>✨ Đang học: Unit {selectedUnit}</span>
           </div>
         </header>
 
@@ -103,16 +104,16 @@ export default function App() {
         </main>
 
         {/* Persistent Footer */}
-        <footer className="bg-white/80 border-t border-amber-200/80 py-4 px-6 text-xs text-slate-500">
+        <footer className="bg-white/80 backdrop-blur-md border-t-2 border-amber-200/80 py-4 px-6 text-xs text-slate-600">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
             <div>
               <p className="font-black text-slate-800 flex items-center justify-center sm:justify-start gap-1">
                 🦉 GIA SƯ TIẾNG ANH CHIBI 9 • BÁM SÁT 12 UNIT SGK GLOBAL SUCCESS
               </p>
-              <p className="text-[11px] text-slate-500">Quy trình Socratic • Luyện 430 từ vựng Unit 1-6 • Thi vào 10 THPT</p>
+              <p className="text-[11px] text-slate-500 font-medium">Quy trình Socratic • Luyện 430 từ vựng Unit 1-6 • Thi vào 10 THPT</p>
             </div>
             <div className="flex items-center gap-2">
-              <span className="bg-amber-100 text-amber-900 border border-amber-300/80 px-2.5 py-0.5 rounded-full font-bold text-[10px]">
+              <span className="bg-amber-100 text-amber-950 border-2 border-amber-300 px-3 py-1 rounded-xl font-black text-[10px] shadow-xs">
                 Gemini 3.6 Flash
               </span>
             </div>
