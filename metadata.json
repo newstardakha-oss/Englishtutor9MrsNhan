@@ -1,0 +1,6 @@
+{
+  "name": "Gia Sư Tiếng Anh 9 SGK - Định Hướng Thi Vào 10",
+  "description": "Gia sư Tiếng Anh lớp 9 thông minh bám sát SGK Global Success, củng cố từ vựng, ngữ pháp, rèn 4 kỹ năng, phát hiện lỗ hổng và luyện đề thi vào 10.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
