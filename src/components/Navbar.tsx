@@ -166,7 +166,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Sidebar Footer Badge */}
         <div className="pt-4 border-t border-amber-200/80 text-center">
           <span className="text-[10px] font-bold text-amber-800 bg-amber-100/80 px-3 py-1 rounded-full border border-amber-200 inline-block">
-            🎀 Chibi Pastel Edition • Lớp 9 Global Success
+            🎀 Created by Mrs Nhan DakHa • Lớp 9 Global Success
           </span>
         </div>
       </aside>

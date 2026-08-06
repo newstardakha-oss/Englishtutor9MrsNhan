@@ -44,7 +44,7 @@ export default function App() {
             <span className="bg-amber-300 text-amber-950 font-black px-2.5 py-0.5 rounded-full text-[10px] uppercase shadow-xs">
               GLOBAL SUCCESS 9
             </span>
-            <span>Gia Sư Tiếng Anh Lớp 9 • Chibi Pastel Edition</span>
+            <span>Gia Sư Tiếng Anh Lớp 9 • Created by Mrs Nhan DakHa</span>
           </div>
 
           <div className="flex items-center gap-2 text-amber-900 font-semibold">
