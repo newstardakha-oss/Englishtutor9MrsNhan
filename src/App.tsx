@@ -20,11 +20,13 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-indigo-50/50 to-pink-50/40 text-slate-900 flex flex-col font-sans selection:bg-pink-200 selection:text-pink-900 relative">
-      {/* Decorative Chibi background elements */}
-      <div className="fixed top-20 left-10 w-72 h-72 bg-purple-300/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="fixed bottom-20 right-10 w-96 h-96 bg-pink-300/10 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-screen bg-gradient-to-br from-[#fefcf6] via-[#f7f2fc] to-[#eef4ff] text-slate-800 flex font-sans selection:bg-pink-200 selection:text-pink-900 relative">
+      {/* Decorative Chibi Pastel Background Blurs */}
+      <div className="fixed top-12 left-64 w-80 h-80 bg-purple-200/30 rounded-full blur-3xl pointer-events-none" />
+      <div className="fixed bottom-12 right-12 w-96 h-96 bg-pink-200/30 rounded-full blur-3xl pointer-events-none" />
+      <div className="fixed top-1/2 right-1/3 w-72 h-72 bg-amber-200/20 rounded-full blur-3xl pointer-events-none" />
 
+      {/* Left Vertical Pastel 3D Sidebar */}
       <Navbar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -34,75 +36,89 @@ export default function App() {
         setTtsEnabled={setTtsEnabled}
       />
 
-      <main className="flex-1 pb-12 relative z-10">
-        {activeTab === 'chat' && (
-          <TutorChat
-            selectedUnit={selectedUnit}
-            setSelectedUnit={setSelectedUnit}
-            ttsEnabled={ttsEnabled}
-          />
-        )}
-
-        {activeTab === 'sgk' && (
-          <UnitExplorer
-            selectedUnit={selectedUnit}
-            setSelectedUnit={setSelectedUnit}
-            onAskTutor={handleAskTutor}
-            ttsEnabled={ttsEnabled}
-          />
-        )}
-
-        {activeTab === 'grammar' && (
-          <GrammarLab onAskTutor={handleAskTutor} />
-        )}
-
-        {activeTab === 'flashcards' && (
-          <FlashcardMode
-            selectedUnit={selectedUnit}
-            setSelectedUnit={setSelectedUnit}
-            onAskTutor={handleAskTutor}
-          />
-        )}
-
-        {activeTab === 'vocab-game' && (
-          <VocabBattleGame onAskTutor={handleAskTutor} />
-        )}
-
-        {activeTab === 'exam' && (
-          <ExamSimulator onAskTutor={handleAskTutor} />
-        )}
-
-        {activeTab === 'writing' && (
-          <WritingSpeakingLab
-            selectedUnit={selectedUnit}
-            onAskTutor={handleAskTutor}
-          />
-        )}
-
-        {activeTab === 'diagnostic' && (
-          <DiagnosticStudio onAskTutor={handleAskTutor} />
-        )}
-      </main>
-
-      {/* Persistent Footer with Cute Chibi Styling */}
-      <footer className="bg-slate-900 text-slate-400 py-6 border-t-2 border-slate-800 text-xs relative z-10">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
-          <div className="space-y-1">
-            <p className="font-black text-amber-300 text-sm flex items-center justify-center sm:justify-start gap-1">
-              🦉 GIA SƯ TIẾNG ANH CHIBI LỚP 9 • SGK GLOBAL SUCCESS
-            </p>
-            <p className="text-[11px] text-slate-400">
-              Quy trình giảng dạy Socratic • Luyện 430 từ vựng Unit 1-6 • Ôn thi bứt phá vào Lớp 10 THPT
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <span className="bg-indigo-950 text-indigo-300 border border-indigo-700/60 px-3 py-1 rounded-xl font-bold text-[11px] shadow-xs flex items-center gap-1">
-              <Sparkles className="w-3 h-3 text-amber-300" /> AI Engine: Gemini 3.6 Flash
+      {/* Right Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0 min-h-screen relative z-10">
+        {/* Top Soft Pastel Banner */}
+        <header className="bg-amber-100/60 border-b border-amber-200/80 px-6 py-2.5 flex items-center justify-between text-xs">
+          <div className="flex items-center gap-2 font-bold text-amber-950">
+            <span className="bg-amber-300 text-amber-950 font-black px-2.5 py-0.5 rounded-full text-[10px] uppercase shadow-xs">
+              GLOBAL SUCCESS 9
             </span>
+            <span>Gia Sư Tiếng Anh Lớp 9 • Chibi Pastel Edition</span>
           </div>
-        </div>
-      </footer>
+
+          <div className="flex items-center gap-2 text-amber-900 font-semibold">
+            <span>✨ Bài học: Unit {selectedUnit}</span>
+          </div>
+        </header>
+
+        <main className="flex-1 p-4 sm:p-6 lg:p-8">
+          {activeTab === 'chat' && (
+            <TutorChat
+              selectedUnit={selectedUnit}
+              setSelectedUnit={setSelectedUnit}
+              ttsEnabled={ttsEnabled}
+            />
+          )}
+
+          {activeTab === 'sgk' && (
+            <UnitExplorer
+              selectedUnit={selectedUnit}
+              setSelectedUnit={setSelectedUnit}
+              onAskTutor={handleAskTutor}
+              ttsEnabled={ttsEnabled}
+            />
+          )}
+
+          {activeTab === 'grammar' && (
+            <GrammarLab onAskTutor={handleAskTutor} />
+          )}
+
+          {activeTab === 'flashcards' && (
+            <FlashcardMode
+              selectedUnit={selectedUnit}
+              setSelectedUnit={setSelectedUnit}
+              onAskTutor={handleAskTutor}
+            />
+          )}
+
+          {activeTab === 'vocab-game' && (
+            <VocabBattleGame onAskTutor={handleAskTutor} />
+          )}
+
+          {activeTab === 'exam' && (
+            <ExamSimulator onAskTutor={handleAskTutor} />
+          )}
+
+          {activeTab === 'writing' && (
+            <WritingSpeakingLab
+              selectedUnit={selectedUnit}
+              onAskTutor={handleAskTutor}
+            />
+          )}
+
+          {activeTab === 'diagnostic' && (
+            <DiagnosticStudio onAskTutor={handleAskTutor} />
+          )}
+        </main>
+
+        {/* Persistent Footer */}
+        <footer className="bg-white/80 border-t border-amber-200/80 py-4 px-6 text-xs text-slate-500">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
+            <div>
+              <p className="font-black text-slate-800 flex items-center justify-center sm:justify-start gap-1">
+                🦉 GIA SƯ TIẾNG ANH CHIBI 9 • BÁM SÁT 12 UNIT SGK GLOBAL SUCCESS
+              </p>
+              <p className="text-[11px] text-slate-500">Quy trình Socratic • Luyện 430 từ vựng Unit 1-6 • Thi vào 10 THPT</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="bg-amber-100 text-amber-900 border border-amber-300/80 px-2.5 py-0.5 rounded-full font-bold text-[10px]">
+                Gemini 3.6 Flash
+              </span>
+            </div>
+          </div>
+        </footer>
+      </div>
     </div>
   );
 }
