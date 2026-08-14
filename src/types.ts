@@ -154,3 +154,5 @@ export interface TeacherAdminState {
   googleSheetsUrl?: string;
 }
 
+export type UserRole = 'student' | 'teacher' | null;
+

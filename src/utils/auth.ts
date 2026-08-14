@@ -5,6 +5,14 @@ const CURRENT_STUDENT_KEY = 'mrs_nhan_current_student';
 const ALL_STUDENTS_KEY = 'mrs_nhan_all_students';
 const TEACHER_ADMIN_KEY = 'mrs_nhan_teacher_admin';
 
+export const hashPassword = async (password: string): Promise<string> => {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hash));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+};
+
 // Sample initial data for testing dashboard
 const SAMPLE_STUDENTS: StudentProfile[] = [
   {
@@ -104,19 +112,21 @@ export const setCurrentStudent = (student: StudentProfile | null) => {
   }
 };
 
-export const registerStudent = (data: {
+export const registerStudent = async (data: {
   fullName: string;
   className: string;
   schoolName: string;
   wardCommune: string;
   username: string;
   password: string;
-}): { success: boolean; message: string; student?: StudentProfile } => {
+}): Promise<{ success: boolean; message: string; student?: StudentProfile }> => {
   const students = getAllStudents();
   const exists = students.some(s => s.username.toLowerCase() === data.username.trim().toLowerCase());
   if (exists) {
     return { success: false, message: 'Tên đăng nhập này đã được sử dụng. Vui lòng chọn tên khác!' };
   }
+
+  const hashedPassword = await hashPassword(data.password.trim());
 
   const newStudent: StudentProfile = {
     id: `std-${Date.now()}`,
@@ -125,7 +135,7 @@ export const registerStudent = (data: {
     schoolName: data.schoolName.trim(),
     wardCommune: data.wardCommune.trim(),
     username: data.username.trim(),
-    passwordHash: data.password.trim(),
+    passwordHash: hashedPassword,
     createdAt: new Date().toLocaleDateString('vi-VN'),
     lastActiveAt: new Date().toLocaleString('vi-VN'),
     totalStudyMinutes: 0,
@@ -142,10 +152,11 @@ export const registerStudent = (data: {
   return { success: true, message: 'Đăng ký tài khoản học sinh thành công!', student: newStudent };
 };
 
-export const loginStudent = (username: string, password: string): { success: boolean; message: string; student?: StudentProfile } => {
+export const loginStudent = async (username: string, password: string): Promise<{ success: boolean; message: string; student?: StudentProfile }> => {
   const students = getAllStudents();
+  const hashedPassword = await hashPassword(password.trim());
   const student = students.find(
-    s => s.username.toLowerCase() === username.trim().toLowerCase() && s.passwordHash === password.trim()
+    s => s.username.toLowerCase() === username.trim().toLowerCase() && s.passwordHash === hashedPassword
   );
 
   if (!student) {
@@ -219,3 +230,35 @@ export const setTeacherAdminState = (isLoggedIn: boolean) => {
   };
   localStorage.setItem(TEACHER_ADMIN_KEY, JSON.stringify(state));
 };
+
+// Teacher login via PIN
+const VALID_TEACHER_PINS_HASHES = [
+  'cf97c11f754fc3fb5e5eb803beab9c60eecafdeeb45d06b72faeb99119565578', // cva86
+  '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', // 123456
+  '62e3d81b4fbafeb9b46cd64b279a0cf599d1fa980993ad712a1f4bdf98d1a153' // hoangnhancva86
+];
+
+export const loginTeacher = async (pin: string): Promise<{ success: boolean; message: string }> => {
+  const hashedPin = await hashPassword(pin.trim());
+  if (VALID_TEACHER_PINS_HASHES.includes(hashedPin)) {
+    setTeacherAdminState(true);
+    return { success: true, message: 'Chào mừng Cô Nhân! Đăng nhập quản trị thành công.' };
+  }
+  return { success: false, message: 'Mã PIN quản trị không chính xác!' };
+};
+
+export const logoutTeacher = () => {
+  setTeacherAdminState(false);
+};
+
+export const getCurrentTeacher = (): TeacherAdminState | null => {
+  const state = getTeacherAdminState();
+  return state.isLoggedIn ? state : null;
+};
+
+export const getCurrentRole = (): 'student' | 'teacher' | null => {
+  if (getCurrentStudent()) return 'student';
+  if (getCurrentTeacher()) return 'teacher';
+  return null;
+};
+

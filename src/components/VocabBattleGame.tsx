@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   Sparkles, Volume2, Shield, Zap, Heart, Trophy, RefreshCw, Users, User,
   Swords, RotateCw, CheckCircle2, AlertCircle, Award, Flame, Play, VolumeX, Check
@@ -13,7 +13,7 @@ interface VocabBattleGameProps {
 }
 
 type GameMode = 'castle' | 'caro';
-type PlayType = 'solo' | 'pvp'; // Solo vs AI vs 2 Players/Teams
+type PlayType = 'solo' | 'pvp';
 
 interface QuestionChallenge {
   vocab: VocabularyItem;
@@ -24,18 +24,27 @@ interface QuestionChallenge {
 }
 
 export const VocabBattleGame: React.FC<VocabBattleGameProps> = ({ onAskTutor }) => {
-  const [selectedUnit, setSelectedUnit] = useState<number>(0); // 0 = All Units 1-6
+  const timeoutRefs = useRef<number[]>([]);
+
+  useEffect(() => {
+    return () => timeoutRefs.current.forEach(id => clearTimeout(id));
+  }, []);
+
+  const setSafeTimeout = (callback: () => void, ms: number) => {
+    const id = window.setTimeout(callback, ms);
+    timeoutRefs.current.push(id);
+    return id;
+  };
+  const [selectedUnit, setSelectedUnit] = useState<number>(0);
   const [gameMode, setGameMode] = useState<GameMode>('castle');
   const [playType, setPlayType] = useState<PlayType>('solo');
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
 
-  // Filter vocabulary pool based on unit
   const activeVocabPool = useMemo(() => {
     if (selectedUnit === 0) return FULL_VOCABULARY_UNIT_1_TO_6;
     return FULL_VOCABULARY_UNIT_1_TO_6.filter(v => v.unit === selectedUnit);
   }, [selectedUnit]);
 
-  // Helper to generate a random question challenge
   const generateQuestion = useCallback((): QuestionChallenge => {
     const vocab = activeVocabPool[Math.floor(Math.random() * activeVocabPool.length)];
     const qTypes: ('meaning' | 'word' | 'ipa')[] = ['meaning', 'word', 'ipa'];
@@ -55,7 +64,6 @@ export const VocabBattleGame: React.FC<VocabBattleGameProps> = ({ onAskTutor }) 
       correctAnswer = vocab.word;
     }
 
-    // Generate 3 wrong options
     const distractors = activeVocabPool
       .filter(x => x.id !== vocab.id)
       .sort(() => Math.random() - 0.5)
@@ -73,7 +81,6 @@ export const VocabBattleGame: React.FC<VocabBattleGameProps> = ({ onAskTutor }) 
     };
   }, [activeVocabPool]);
 
-  // TTS pronounce
   const speakWord = (word: string) => {
     if (!soundEnabled || !('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
@@ -83,9 +90,7 @@ export const VocabBattleGame: React.FC<VocabBattleGameProps> = ({ onAskTutor }) 
     window.speechSynthesis.speak(utterance);
   };
 
-  // --------------------------------------------------------------------------
-  // CASTLE CONQUEST STATE & LOGIC
-  // --------------------------------------------------------------------------
+  // CASTLE CONQUEST STATE
   const [p1Hp, setP1Hp] = useState(100);
   const [p2Hp, setP2Hp] = useState(100);
   const [p1Shield, setP1Shield] = useState(false);
@@ -93,25 +98,22 @@ export const VocabBattleGame: React.FC<VocabBattleGameProps> = ({ onAskTutor }) 
   const [currentTurn, setCurrentTurn] = useState<1 | 2>(1);
   const [streakP1, setStreakP1] = useState(0);
   const [streakP2, setStreakP2] = useState(0);
-  
+
   const [currentQuestion, setCurrentQuestion] = useState<QuestionChallenge>(() => generateQuestion());
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [attackAnimation, setAttackAnimation] = useState<'p1' | 'p2' | null>(null);
   const [castleGameOver, setCastleGameOver] = useState<boolean>(false);
   const [winner, setWinner] = useState<1 | 2 | null>(null);
 
-  // Switch question when turn changes or game reset
   const nextCastleTurn = (nextTurn: 1 | 2) => {
     setSelectedOption(null);
     setCurrentTurn(nextTurn);
     setCurrentQuestion(generateQuestion());
   };
 
-  // Handle AI turn in Solo mode
   useEffect(() => {
     if (gameMode === 'castle' && playType === 'solo' && currentTurn === 2 && !castleGameOver && !selectedOption) {
-      const timer = setTimeout(() => {
-        // AI has 80% accuracy
+      setSafeTimeout(() => {
         const isAiCorrect = Math.random() < 0.8;
         const aiAnswer = isAiCorrect
           ? currentQuestion.correctAnswer
@@ -119,7 +121,6 @@ export const VocabBattleGame: React.FC<VocabBattleGameProps> = ({ onAskTutor }) 
 
         handleAnswerSelect(aiAnswer, 2);
       }, 1500);
-      return () => clearTimeout(timer);
     }
   }, [currentTurn, gameMode, playType, castleGameOver, currentQuestion, selectedOption]);
 
@@ -133,16 +134,15 @@ export const VocabBattleGame: React.FC<VocabBattleGameProps> = ({ onAskTutor }) 
     if (isCorrect) {
       if (soundEnabled) playSound('attack');
       setAttackAnimation(turn === 1 ? 'p1' : 'p2');
-      setTimeout(() => setAttackAnimation(null), 800);
+      setSafeTimeout(() => setAttackAnimation(null), 800);
 
-      // Damage opponent
       const baseDamage = 20;
       if (turn === 1) {
         setStreakP1(prev => prev + 1);
         if (streakP1 + 1 >= 3) setP1Shield(true);
 
         if (p2Shield) {
-          setP2Shield(false); // Shield blocks attack
+          setP2Shield(false);
         } else {
           setP2Hp(prev => {
             const next = Math.max(0, prev - baseDamage);
@@ -159,7 +159,7 @@ export const VocabBattleGame: React.FC<VocabBattleGameProps> = ({ onAskTutor }) 
         if (streakP2 + 1 >= 3) setP2Shield(true);
 
         if (p1Shield) {
-          setP1Shield(false); // Shield blocks attack
+          setP1Shield(false);
         } else {
           setP1Hp(prev => {
             const next = Math.max(0, prev - baseDamage);
@@ -174,7 +174,6 @@ export const VocabBattleGame: React.FC<VocabBattleGameProps> = ({ onAskTutor }) 
       }
     } else {
       if (soundEnabled) playSound('wrong');
-      // Misfire penalty
       if (turn === 1) {
         setStreakP1(0);
         setP1Hp(prev => Math.max(0, prev - 5));
@@ -184,8 +183,7 @@ export const VocabBattleGame: React.FC<VocabBattleGameProps> = ({ onAskTutor }) 
       }
     }
 
-    // Delay before next turn
-    setTimeout(() => {
+    setSafeTimeout(() => {
       if (!castleGameOver) {
         nextCastleTurn(turn === 1 ? 2 : 1);
       }
@@ -206,9 +204,7 @@ export const VocabBattleGame: React.FC<VocabBattleGameProps> = ({ onAskTutor }) 
     setCurrentQuestion(generateQuestion());
   };
 
-  // --------------------------------------------------------------------------
-  // CARO VOCAB QUIZ 5x5 STATE & LOGIC
-  // --------------------------------------------------------------------------
+  // CARO VOCAB QUIZ 5x5 STATE
   const [board, setBoard] = useState<Array<string | null>>(Array(25).fill(null));
   const [caroTurn, setCaroTurn] = useState<'X' | 'O'>('X');
   const [activeCellIdx, setActiveCellIdx] = useState<number | null>(null);
@@ -236,33 +232,28 @@ export const VocabBattleGame: React.FC<VocabBattleGameProps> = ({ onAskTutor }) 
       newBoard[activeCellIdx] = caroTurn;
       setBoard(newBoard);
 
-      // Check win condition for 5 in a row
       if (checkCaroWin(newBoard, caroTurn)) {
         setCaroWinner(caroTurn);
         if (soundEnabled) playSound('victory');
       } else if (newBoard.every(c => c !== null)) {
         setCaroWinner('draw');
       } else {
-        // Switch turn
         setCaroTurn(caroTurn === 'X' ? 'O' : 'X');
       }
     } else {
       if (soundEnabled) playSound('wrong');
-      // Switch turn without marking
       setCaroTurn(caroTurn === 'X' ? 'O' : 'X');
     }
 
-    setTimeout(() => {
+    setSafeTimeout(() => {
       setActiveCellIdx(null);
       setCaroQuestion(null);
       setCaroSelectedOpt(null);
     }, 1800);
   };
 
-  // Check 5 in a row on 5x5 board
   const checkCaroWin = (b: Array<string | null>, symbol: 'X' | 'O') => {
     const size = 5;
-    // Check rows & columns
     for (let r = 0; r < size; r++) {
       let rowWin = true;
       let colWin = true;
@@ -273,7 +264,6 @@ export const VocabBattleGame: React.FC<VocabBattleGameProps> = ({ onAskTutor }) 
       if (rowWin || colWin) return true;
     }
 
-    // Main diagonals
     let diag1 = true;
     let diag2 = true;
     for (let i = 0; i < size; i++) {
@@ -292,17 +282,54 @@ export const VocabBattleGame: React.FC<VocabBattleGameProps> = ({ onAskTutor }) 
     setCaroWinner(null);
   };
 
+  useEffect(() => {
+    if (gameMode === 'caro' && playType === 'solo' && caroTurn === 'O' && !caroWinner) {
+      if (activeCellIdx === null) {
+        setSafeTimeout(() => {
+          const emptyCells = board.map((c, i) => c === null ? i : null).filter(i => i !== null) as number[];
+          if (emptyCells.length === 0) return;
+
+          let selectedMove = -1;
+          for (const idx of emptyCells) {
+            const testBoard = [...board];
+            testBoard[idx] = 'O';
+            if (checkCaroWin(testBoard, 'O')) { selectedMove = idx; break; }
+          }
+          if (selectedMove === -1) {
+            for (const idx of emptyCells) {
+              const testBoard = [...board];
+              testBoard[idx] = 'X';
+              if (checkCaroWin(testBoard, 'X')) { selectedMove = idx; break; }
+            }
+          }
+          if (selectedMove === -1) {
+            selectedMove = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+          }
+          handleCellClick(selectedMove);
+        }, 500);
+      } else if (caroQuestion && caroSelectedOpt === null) {
+        setSafeTimeout(() => {
+          const isAiCorrect = Math.random() < 0.8;
+          const aiAnswer = isAiCorrect
+            ? caroQuestion.correctAnswer
+            : caroQuestion.options.find(o => o !== caroQuestion.correctAnswer) || caroQuestion.options[0];
+          handleCaroAnswer(aiAnswer);
+        }, 1500);
+      }
+    }
+  }, [caroTurn, gameMode, playType, caroWinner, activeCellIdx, board, caroQuestion, caroSelectedOpt]);
+
   return (
-    <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
-      {/* Game Arcade Header */}
-      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-950 text-white p-6 rounded-3xl border border-slate-800 shadow-xl relative overflow-hidden">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 relative z-10">
+    <div className="max-w-7xl mx-auto space-y-6">
+      {/* Header Arcade */}
+      <div className="bg-slate-900 text-white p-6 rounded-2xl border border-slate-800 shadow-md">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-2 flex-wrap">
-              <span className="bg-amber-400 text-slate-950 font-black text-[10px] px-3 py-1 rounded-full uppercase tracking-wider flex items-center gap-1 shadow-xs">
-                <Swords className="w-3.5 h-3.5" /> Đấu Trường Game Từ Vựng đối kháng
+              <span className="bg-amber-500/20 text-amber-300 font-bold text-[10px] px-3 py-1 rounded-full uppercase tracking-wider border border-amber-500/30 flex items-center gap-1">
+                <Swords className="w-3.5 h-3.5 text-amber-400" /> Đấu Trường Game Từ Vựng
               </span>
-              <span className="bg-blue-950 text-blue-200 text-xs font-bold px-3 py-1 rounded-full border border-blue-800">
+              <span className="bg-indigo-950 text-cyan-300 text-xs font-bold px-3 py-1 rounded-full border border-indigo-500/40">
                 Kho {activeVocabPool.length} Từ vựng SGK 9
               </span>
             </div>
@@ -314,9 +341,7 @@ export const VocabBattleGame: React.FC<VocabBattleGameProps> = ({ onAskTutor }) 
             </p>
           </div>
 
-          {/* Controls Bar */}
-          <div className="flex flex-wrap items-center gap-2 bg-slate-900/90 p-2.5 rounded-2xl border border-slate-800">
-            {/* Unit Selector */}
+          <div className="flex flex-wrap items-center gap-2 bg-slate-950/80 p-2.5 rounded-2xl border border-slate-800">
             <div className="flex items-center gap-1 text-xs">
               <span className="text-slate-400 font-semibold ml-1">Bộ từ:</span>
               <select
@@ -326,7 +351,7 @@ export const VocabBattleGame: React.FC<VocabBattleGameProps> = ({ onAskTutor }) 
                   resetCastleGame();
                   resetCaroGame();
                 }}
-                className="bg-slate-800 text-amber-300 font-bold text-xs px-2.5 py-1.5 rounded-xl border border-slate-700 outline-none"
+                className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs px-2.5 py-1.5 rounded-xl border border-indigo-400/30 outline-none cursor-pointer"
               >
                 <option value={0}>Tất cả Unit 1-6 ({FULL_VOCABULARY_UNIT_1_TO_6.length} từ)</option>
                 {UNITS_DATA.slice(0, 6).map(u => (
@@ -335,235 +360,162 @@ export const VocabBattleGame: React.FC<VocabBattleGameProps> = ({ onAskTutor }) 
               </select>
             </div>
 
-            {/* Play Mode Selector */}
-            <div className="flex items-center gap-1 border-l border-slate-700 pl-2 text-xs">
+            <div className="flex items-center gap-1 border-l border-slate-800 pl-2 text-xs">
               <button
                 onClick={() => setPlayType('solo')}
-                className={`px-3 py-1.5 rounded-xl font-bold transition-all flex items-center gap-1 ${
-                  playType === 'solo' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'
+                className={`px-3 py-1.5 rounded-xl font-bold transition-all flex items-center gap-1 border ${
+                  playType === 'solo' ? 'bg-indigo-600 text-white border-indigo-400' : 'text-slate-400 border-transparent hover:text-white'
                 }`}
               >
                 <User className="w-3.5 h-3.5" /> Đấu AI
               </button>
               <button
                 onClick={() => setPlayType('pvp')}
-                className={`px-3 py-1.5 rounded-xl font-bold transition-all flex items-center gap-1 ${
-                  playType === 'pvp' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
+                className={`px-3 py-1.5 rounded-xl font-bold transition-all flex items-center gap-1 border ${
+                  playType === 'pvp' ? 'bg-indigo-600 text-white border-indigo-400' : 'text-slate-400 border-transparent hover:text-white'
                 }`}
               >
-                <Users className="w-3.5 h-3.5" /> 2 Đội / 2 Người
+                <Users className="w-3.5 h-3.5" /> 2 Người
               </button>
             </div>
 
-            {/* Sound Toggle */}
             <button
               onClick={() => setSoundEnabled(!soundEnabled)}
-              className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-slate-700 ml-1"
-              title="Bật/Tắt âm thanh"
+              className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-colors ml-1"
+              title="Âm thanh"
             >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+              {soundEnabled ? <Volume2 className="w-4 h-4 text-cyan-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
             </button>
           </div>
         </div>
 
-        {/* Game Mode Tabs */}
-        <div className="flex gap-2 mt-6 border-t border-slate-800 pt-4 relative z-10">
+        {/* Mode Tabs */}
+        <div className="flex gap-2 mt-4 border-t border-slate-800 pt-4">
           <button
             onClick={() => setGameMode('castle')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+            className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border ${
               gameMode === 'castle'
-                ? 'bg-amber-400 text-slate-950 shadow-md ring-2 ring-amber-300/50'
-                : 'bg-slate-800 text-slate-300 hover:text-white'
+                ? 'bg-indigo-600 text-white border-indigo-400 shadow-md'
+                : 'bg-slate-950/60 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-white'
             }`}
           >
-            🏰 Chiếm Lâu Đài Từ Vựng (HP Battle)
+            🏰 Trận Chiến Lâu Đài (HP Battle)
           </button>
           <button
             onClick={() => setGameMode('caro')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+            className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border ${
               gameMode === 'caro'
-                ? 'bg-amber-400 text-slate-950 shadow-md ring-2 ring-amber-300/50'
-                : 'bg-slate-800 text-slate-300 hover:text-white'
+                ? 'bg-indigo-600 text-white border-indigo-400 shadow-md'
+                : 'bg-slate-950/60 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-white'
             }`}
           >
-            🎲 Đấu Cờ Caro Từ Vựng 5x5
+            ❌⭕ Đấu Cờ Caro Vocab 5x5
           </button>
         </div>
       </div>
 
-      {/* ==================================================================== */}
-      {/* GAME FORMAT 1: CASTLE CONQUEST (HP BATTLE) */}
-      {/* ==================================================================== */}
+      {/* GAME MODE 1: CASTLE CONQUEST */}
       {gameMode === 'castle' && (
-        <div className="space-y-6">
-          {/* Castles Graphic Arena */}
-          <div className="grid grid-cols-2 gap-4 bg-gradient-to-b from-slate-900 via-indigo-950 to-slate-950 p-6 rounded-3xl border border-slate-800 text-white relative overflow-hidden shadow-2xl">
-            {/* Attack Animation Effects */}
-            {attackAnimation === 'p1' && (
-              <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-48 h-2 bg-gradient-to-r from-blue-400 to-amber-300 rounded-full animate-ping z-30" />
-            )}
-            {attackAnimation === 'p2' && (
-              <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-48 h-2 bg-gradient-to-l from-rose-400 to-amber-300 rounded-full animate-ping z-30" />
-            )}
-
-            {/* Left Castle (Team 1 / Player 1) */}
-            <div className={`p-4 rounded-2xl border transition-all text-center space-y-3 relative ${
-              currentTurn === 1 ? 'border-blue-400 bg-blue-950/40 ring-4 ring-blue-500/30' : 'border-slate-800 bg-slate-900/60 opacity-80'
+        <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-md space-y-6">
+          {/* Health Bars & Mascot Arena Header */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* Player 1 */}
+            <div className={`p-4 rounded-2xl border space-y-2 transition-all ${
+              currentTurn === 1 ? 'bg-indigo-950/80 border-indigo-500 shadow-md' : 'bg-slate-950 border-slate-800 opacity-80'
             }`}>
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-black text-blue-400 uppercase tracking-wider flex items-center gap-1">
-                  🛡️ {playType === 'solo' ? 'Đội 1 (Bạn)' : 'Đội 1 (Xanh)'}
+              <div className="flex items-center justify-between">
+                <span className="font-black text-sm text-cyan-300 flex items-center gap-1.5">
+                  <User className="w-4 h-4" /> Người Chơi 1 (Bạn)
                 </span>
-                {streakP1 >= 3 && <span className="text-[11px] font-bold text-amber-300 bg-amber-950 px-2 py-0.5 rounded-full border border-amber-500/50">🔥 Streak x{streakP1}</span>}
+                {p1Shield && <span className="bg-indigo-500/20 text-indigo-300 font-bold text-[10px] px-2 py-0.5 rounded border border-indigo-500/40">Khiên Chắn</span>}
               </div>
-
-              {/* Graphic Castle Icon */}
-              <div className="relative inline-block my-2">
-                <span className="text-6xl sm:text-7xl block transition-transform hover:scale-105">🏰</span>
-                {p1Shield && (
-                  <Shield className="w-8 h-8 text-cyan-300 fill-cyan-500/30 absolute top-0 right-0 animate-pulse" />
-                )}
-              </div>
-
-              {/* HP Bar */}
               <div className="space-y-1">
-                <div className="flex justify-between text-[11px] font-bold">
-                  <span>Máu Lâu Đài</span>
-                  <span className="text-blue-300">{p1Hp} / 100 HP</span>
+                <div className="flex justify-between text-[11px] font-bold text-slate-300">
+                  <span>HP Lâu Đài</span>
+                  <span>{p1Hp} / 100</span>
                 </div>
-                <div className="w-full h-3 bg-slate-800 rounded-full overflow-hidden border border-slate-700">
-                  <div
-                    className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 transition-all duration-500"
-                    style={{ width: `${p1Hp}%` }}
-                  />
+                <div className="w-full h-3 bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-700">
+                  <div className="h-full bg-emerald-500 rounded-full transition-all" style={{ width: `${p1Hp}%` }}></div>
                 </div>
               </div>
             </div>
 
-            {/* Right Castle (Team 2 / AI) */}
-            <div className={`p-4 rounded-2xl border transition-all text-center space-y-3 relative ${
-              currentTurn === 2 ? 'border-rose-400 bg-rose-950/40 ring-4 ring-rose-500/30' : 'border-slate-800 bg-slate-900/60 opacity-80'
+            {/* Player 2 / AI */}
+            <div className={`p-4 rounded-2xl border space-y-2 transition-all ${
+              currentTurn === 2 ? 'bg-rose-950/80 border-rose-500 shadow-md' : 'bg-slate-950 border-slate-800 opacity-80'
             }`}>
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-black text-rose-400 uppercase tracking-wider flex items-center gap-1">
-                  🏰 {playType === 'solo' ? 'AI Gia Sư' : 'Đội 2 (Đỏ)'}
+              <div className="flex items-center justify-between">
+                <span className="font-black text-sm text-rose-300 flex items-center gap-1.5">
+                  <Users className="w-4 h-4" /> {playType === 'solo' ? 'Đối Thủ AI' : 'Người Chơi 2'}
                 </span>
-                {streakP2 >= 3 && <span className="text-[11px] font-bold text-amber-300 bg-amber-950 px-2 py-0.5 rounded-full border border-amber-500/50">🔥 Streak x{streakP2}</span>}
+                {p2Shield && <span className="bg-rose-500/20 text-rose-300 font-bold text-[10px] px-2 py-0.5 rounded border border-rose-500/40">Khiên Chắn</span>}
               </div>
-
-              {/* Graphic Castle Icon */}
-              <div className="relative inline-block my-2">
-                <span className="text-6xl sm:text-7xl block transition-transform hover:scale-105">🏰</span>
-                {p2Shield && (
-                  <Shield className="w-8 h-8 text-cyan-300 fill-cyan-500/30 absolute top-0 right-0 animate-pulse" />
-                )}
-              </div>
-
-              {/* HP Bar */}
               <div className="space-y-1">
-                <div className="flex justify-between text-[11px] font-bold">
-                  <span>Máu Lâu Đài</span>
-                  <span className="text-rose-300">{p2Hp} / 100 HP</span>
+                <div className="flex justify-between text-[11px] font-bold text-slate-300">
+                  <span>HP Lâu Đài</span>
+                  <span>{p2Hp} / 100</span>
                 </div>
-                <div className="w-full h-3 bg-slate-800 rounded-full overflow-hidden border border-slate-700">
-                  <div
-                    className="h-full bg-gradient-to-r from-rose-500 to-amber-400 transition-all duration-500"
-                    style={{ width: `${p2Hp}%` }}
-                  />
+                <div className="w-full h-3 bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-700">
+                  <div className="h-full bg-rose-500 rounded-full transition-all" style={{ width: `${p2Hp}%` }}></div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Question & Turn Card */}
+          {/* Question Challenge Box */}
           {!castleGameOver ? (
-            <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-lg space-y-6 max-w-2xl mx-auto">
-              <div className="flex items-center justify-between border-b pb-3 text-xs">
-                <span className="font-bold text-slate-500">
-                  Lượt bắn: <strong className={currentTurn === 1 ? 'text-blue-600' : 'text-rose-600'}>
-                    {currentTurn === 1 ? (playType === 'solo' ? 'Đội 1 (Bạn)' : 'Đội 1 (Xanh)') : (playType === 'solo' ? 'AI Gia Sư' : 'Đội 2 (Đỏ)')}
-                  </strong>
+            <div className="bg-slate-950 p-6 rounded-2xl border border-slate-800 space-y-5">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                <span className="text-xs font-bold text-cyan-300 flex items-center gap-1.5">
+                  <Zap className="w-4 h-4 text-amber-400" /> Lượt đánh của: {currentTurn === 1 ? 'Người Chơi 1' : playType === 'solo' ? 'AI' : 'Người Chơi 2'}
                 </span>
-                <span className="text-[11px] bg-slate-100 text-slate-700 font-semibold px-2.5 py-0.5 rounded-full">
-                  Unit {currentQuestion.vocab.unit}
-                </span>
+                <span className="text-xs font-bold text-slate-400">Trả lời đúng để tấn công lâu dài đối thủ</span>
               </div>
 
-              {/* Question Text */}
               <div className="text-center space-y-2 py-2">
-                <h3 className="text-xl sm:text-2xl font-black text-slate-900 leading-snug">
-                  {currentQuestion.prompt}
-                </h3>
-                <p className="text-xs text-slate-400 font-medium">Trả lời đúng để bắn chưởng gây 20 HP sát thương!</p>
+                <h3 className="text-xl sm:text-2xl font-black text-white">{currentQuestion.prompt}</h3>
               </div>
 
               {/* Options */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {currentQuestion.options.map((option, idx) => {
-                  const isSelected = selectedOption === option;
-                  const isCorrect = option === currentQuestion.correctAnswer;
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                {currentQuestion.options.map((opt, idx) => {
+                  const isSelected = selectedOption === opt;
+                  const isCorrect = opt === currentQuestion.correctAnswer;
 
-                  let btnStyle = 'bg-slate-50 hover:bg-blue-50/80 border-slate-200 text-slate-800';
+                  let btnClass = 'bg-slate-900 hover:bg-slate-800 border-slate-800 text-slate-200';
                   if (selectedOption !== null) {
                     if (isCorrect) {
-                      btnStyle = 'bg-emerald-600 text-white border-emerald-600 ring-2 ring-emerald-400/50 shadow-md';
+                      btnClass = 'bg-emerald-600 text-white border-emerald-400 shadow-md';
                     } else if (isSelected) {
-                      btnStyle = 'bg-rose-600 text-white border-rose-600 ring-2 ring-rose-400/50';
+                      btnClass = 'bg-rose-600 text-white border-rose-400 shadow-md';
                     } else {
-                      btnStyle = 'bg-slate-50 text-slate-400 border-slate-200 opacity-50';
+                      btnClass = 'bg-slate-900 text-slate-500 border-slate-800 opacity-40';
                     }
                   }
 
                   return (
                     <button
                       key={idx}
-                      onClick={() => handleAnswerSelect(option)}
+                      onClick={() => handleAnswerSelect(opt)}
                       disabled={selectedOption !== null || (playType === 'solo' && currentTurn === 2)}
-                      className={`p-4 rounded-2xl text-left text-xs font-bold transition-all border flex items-center justify-between ${btnStyle}`}
+                      className={`p-4 rounded-2xl text-left text-xs font-bold transition-all border flex items-center justify-between ${btnClass}`}
                     >
-                      <span className="flex items-center gap-2.5">
-                        <span className="w-6 h-6 rounded-full bg-slate-200 text-slate-800 flex items-center justify-center font-bold text-xs shrink-0">
-                          {String.fromCharCode(65 + idx)}
-                        </span>
-                        <span>{option}</span>
-                      </span>
-                      {selectedOption !== null && isCorrect && <Check className="w-4 h-4 text-white" />}
+                      <span>{opt}</span>
+                      {selectedOption !== null && isCorrect && <Check className="w-5 h-5 text-white" />}
                     </button>
                   );
                 })}
               </div>
-
-              {/* Result Notice */}
-              {selectedOption !== null && (
-                <div className={`p-4 rounded-2xl border text-xs space-y-1 text-center animate-fade-in ${
-                  selectedOption === currentQuestion.correctAnswer
-                    ? 'bg-emerald-50 border-emerald-300 text-emerald-950 font-bold'
-                    : 'bg-rose-50 border-rose-300 text-rose-950 font-bold'
-                }`}>
-                  <p>
-                    {selectedOption === currentQuestion.correctAnswer
-                      ? '⚡ BẮN CHƯỞNG THÀNH CÔNG! Gây 20 HP sát thương!'
-                      : '❌ TRẢ LỜI SAI! Bắn hụt và bị phạt nổ -5 HP!'}
-                  </p>
-                  <p className="text-[11px] font-normal text-slate-600">
-                    Từ vựng: <strong className="font-mono">{currentQuestion.vocab.word}</strong> ({currentQuestion.vocab.ipa}) = "{currentQuestion.vocab.meaning}"
-                  </p>
-                </div>
-              )}
             </div>
           ) : (
-            /* Game Victory Screen */
-            <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-xl text-center space-y-4 max-w-md mx-auto animate-fade-in">
-              <Trophy className="w-16 h-16 text-amber-500 mx-auto" />
-              <h2 className="text-2xl font-black text-slate-900">
-                {winner === 1 ? (playType === 'solo' ? '🎉 BẠN ĐÃ CHIẾN THẮNG AI GIA SƯ!' : '🎉 ĐỘI 1 (XANH) THẮNG CUỘC!') : '🎉 ĐỘI 2 (ĐỎ) THẮNG CUỘC!'}
+            <div className="bg-slate-950 p-8 rounded-2xl border border-slate-800 text-center space-y-4">
+              <Trophy className="w-16 h-16 text-amber-400 mx-auto" />
+              <h2 className="text-2xl font-black text-white">
+                🎉 Người Chơi {winner} Đã Chiếm Lĩnh Lâu Đài Chiến Thắng!
               </h2>
-              <p className="text-xs text-slate-500">
-                Bạn đã phá hủy hoàn toàn Lâu đài của đối thủ nhờ vốn từ vựng xuất sắc!
-              </p>
               <button
                 onClick={resetCastleGame}
-                className="px-6 py-3 bg-amber-400 text-slate-950 font-black rounded-2xl text-xs shadow-md hover:bg-amber-300 transition-colors"
+                className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-2xl text-xs shadow-md transition-colors"
               >
                 Chơi Trận Mới
               </button>
@@ -572,49 +524,32 @@ export const VocabBattleGame: React.FC<VocabBattleGameProps> = ({ onAskTutor }) 
         </div>
       )}
 
-      {/* ==================================================================== */}
-      {/* GAME FORMAT 2: CARO VOCAB QUIZ 5x5 */}
-      {/* ==================================================================== */}
+      {/* GAME MODE 2: CARO 5x5 */}
       {gameMode === 'caro' && (
-        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-6 max-w-3xl mx-auto">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-4 gap-3">
-            <div>
-              <h3 className="font-black text-slate-900 text-lg flex items-center gap-2">
-                🎲 Đấu Cờ Caro Từ Vựng 5x5
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Chọn 1 ô bất kỳ → Trả lời đúng từ vựng để cắm cờ <strong className="text-blue-600">X</strong> hoặc <strong className="text-rose-600">O</strong>. Đạt 5 ô liên tiếp để thắng!
-              </p>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <span className={`text-xs font-black px-3 py-1 rounded-full border ${
-                caroTurn === 'X' ? 'bg-blue-100 text-blue-900 border-blue-300' : 'bg-rose-100 text-rose-900 border-rose-300'
-              }`}>
-                Lượt của: Quân {caroTurn}
-              </span>
-              <button
-                onClick={resetCaroGame}
-                className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-xl font-bold flex items-center gap-1"
-              >
-                <RefreshCw className="w-3.5 h-3.5" /> Chơi Lại Bàn Cờ
-              </button>
-            </div>
+        <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-md space-y-6 max-w-xl mx-auto">
+          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+            <span className="text-xs font-bold text-white flex items-center gap-1.5">
+              Lượt đánh cờ: <strong className="text-cyan-300 text-sm">Quân {caroTurn}</strong>
+            </span>
+            <button
+              onClick={resetCaroGame}
+              className="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1 rounded-xl font-bold transition-colors"
+            >
+              Đặt Lại Bàn Cờ
+            </button>
           </div>
 
-          {/* 5x5 Board Grid */}
-          <div className="grid grid-cols-5 gap-2 max-w-md mx-auto aspect-square p-3 bg-slate-900 rounded-3xl shadow-inner border border-slate-800">
+          <div className="grid grid-cols-5 gap-2 bg-slate-950 p-4 rounded-2xl border border-slate-800">
             {board.map((cell, idx) => (
               <button
                 key={idx}
                 onClick={() => handleCellClick(idx)}
-                disabled={cell !== null || caroWinner !== null}
-                className={`w-full h-full rounded-2xl font-black text-xl sm:text-2xl transition-all flex items-center justify-center border shadow-xs ${
+                className={`h-12 sm:h-16 rounded-xl font-black text-xl flex items-center justify-center transition-all border ${
                   cell === 'X'
-                    ? 'bg-blue-600 text-white border-blue-400 ring-2 ring-blue-300/50'
+                    ? 'bg-indigo-600 text-white border-indigo-400'
                     : cell === 'O'
-                    ? 'bg-rose-600 text-white border-rose-400 ring-2 ring-rose-300/50'
-                    : 'bg-slate-800 hover:bg-slate-700 text-slate-500 border-slate-700 hover:border-amber-400'
+                    ? 'bg-rose-600 text-white border-rose-400'
+                    : 'bg-slate-900 border-slate-800 text-slate-600 hover:bg-slate-800 hover:border-slate-700'
                 }`}
               >
                 {cell}
@@ -623,66 +558,33 @@ export const VocabBattleGame: React.FC<VocabBattleGameProps> = ({ onAskTutor }) 
           </div>
 
           {/* Caro Question Modal */}
-          {activeCellIdx !== null && caroQuestion && (
-            <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
-              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-2xl max-w-md w-full space-y-4">
-                <div className="flex items-center justify-between border-b pb-2 text-xs">
-                  <span className="font-bold text-slate-500">
-                    Câu hỏi đánh ô cờ {activeCellIdx + 1} (Quân {caroTurn})
-                  </span>
-                  <span className="text-xs bg-amber-100 text-amber-900 font-bold px-2.5 py-0.5 rounded-full">
-                    Unit {caroQuestion.vocab.unit}
-                  </span>
-                </div>
-
-                <div className="text-center space-y-2 py-2">
-                  <h4 className="text-lg font-black text-slate-900">{caroQuestion.prompt}</h4>
-                </div>
-
-                <div className="grid grid-cols-1 gap-2.5">
-                  {caroQuestion.options.map((option, idx) => {
-                    const isSelected = caroSelectedOpt === option;
-                    const isCorrect = option === caroQuestion.correctAnswer;
-
-                    let btnStyle = 'bg-slate-50 hover:bg-blue-50 border-slate-200 text-slate-800';
-                    if (caroSelectedOpt !== null) {
-                      if (isCorrect) {
-                        btnStyle = 'bg-emerald-600 text-white border-emerald-600';
-                      } else if (isSelected) {
-                        btnStyle = 'bg-rose-600 text-white border-rose-600';
-                      } else {
-                        btnStyle = 'bg-slate-50 text-slate-400 border-slate-200 opacity-50';
-                      }
-                    }
-
-                    return (
-                      <button
-                        key={idx}
-                        onClick={() => handleCaroAnswer(option)}
-                        disabled={caroSelectedOpt !== null}
-                        className={`p-3 rounded-2xl text-left text-xs font-bold transition-all border ${btnStyle}`}
-                      >
-                        {String.fromCharCode(65 + idx)}. {option}
-                      </button>
-                    );
-                  })}
-                </div>
+          {caroQuestion && (
+            <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl space-y-3">
+              <h4 className="font-bold text-white text-xs text-center">{caroQuestion.prompt}</h4>
+              <div className="grid grid-cols-2 gap-2">
+                {caroQuestion.options.map((opt, oIdx) => (
+                  <button
+                    key={oIdx}
+                    onClick={() => handleCaroAnswer(opt)}
+                    disabled={caroSelectedOpt !== null}
+                    className="p-2.5 bg-slate-900 hover:bg-indigo-950 border border-slate-800 rounded-xl text-xs font-bold text-slate-200 text-left transition-colors"
+                  >
+                    {opt}
+                  </button>
+                ))}
               </div>
             </div>
           )}
 
-          {/* Caro Winner Modal */}
-          {caroWinner !== null && (
-            <div className="bg-amber-50 border border-amber-300 p-6 rounded-3xl text-center space-y-3 animate-fade-in">
-              <Trophy className="w-12 h-12 text-amber-500 mx-auto" />
-              <h3 className="text-xl font-black text-slate-900">
-                {caroWinner === 'draw' ? 'Trận đấu hòa nhau!' : `🎉 QUÂN ${caroWinner} ĐÃ THẮNG BÀN CỜ CARO 5x5!`}
-              </h3>
+          {caroWinner && (
+            <div className="bg-slate-950 p-6 rounded-2xl border border-slate-800 text-center space-y-3">
+              <Trophy className="w-12 h-12 text-amber-400 mx-auto" />
+              <h3 className="text-xl font-black text-white">Quân {caroWinner} Chiến Thắng 5 Hàng Ngang/Dọc!</h3>
               <button
                 onClick={resetCaroGame}
-                className="px-6 py-2.5 bg-amber-400 text-slate-950 font-black rounded-xl text-xs shadow-md hover:bg-amber-300"
+                className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs shadow-md"
               >
-                Chơi Trận Mới
+                Bắt Đầu Ván Mới
               </button>
             </div>
           )}

@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
-import { BookOpen, Bot, Award, Sparkles, AlertCircle, FileText, Zap, Volume2, VolumeX, Swords, Menu, X, ChevronRight, User, ShieldCheck, Trophy, LogOut } from 'lucide-react';
+import {
+  BookOpen, Bot, Award, Sparkles, AlertCircle, FileText, Zap, Volume2, VolumeX,
+  Swords, Menu, X, ChevronRight, User, ShieldCheck, Trophy, LogOut, Flame, Star, Target
+} from 'lucide-react';
 import { StudentProfile } from '../types';
 
 interface NavbarProps {
@@ -35,205 +38,220 @@ export const Navbar: React.FC<NavbarProps> = ({
     {
       id: 'chat',
       label: 'Gia Sư AI Chat',
+      desc: 'Hỏi đáp Socratic 24/7',
       emoji: '🤖',
       icon: Bot,
-      activeGradient: 'from-blue-500 via-sky-400 to-blue-600',
-      activeShadow: 'shadow-[0_6px_0_#1d4ed8]',
-      inactiveBorder: 'border-blue-200 hover:border-blue-400',
-      badge: 'AI Chibi',
-      badgeBg: 'bg-blue-100 text-blue-900 border-blue-200'
+      activeGradient: 'from-indigo-600 via-blue-600 to-cyan-500',
+      activeShadow: 'shadow-[0_4px_16px_rgba(79,70,229,0.4)]',
+      badge: 'Socratic AI',
+      badgeBg: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30'
     },
     {
       id: 'sgk',
       label: '12 Unit SGK 9',
+      desc: 'Global Success BGD',
       emoji: '📘',
       icon: BookOpen,
-      activeGradient: 'from-emerald-500 via-teal-400 to-emerald-600',
-      activeShadow: 'shadow-[0_6px_0_#0f766e]',
-      inactiveBorder: 'border-emerald-200 hover:border-emerald-400',
-      badge: 'Global Success',
-      badgeBg: 'bg-amber-100 text-amber-900 border-amber-200'
+      activeGradient: 'from-emerald-600 via-teal-600 to-cyan-600',
+      activeShadow: 'shadow-[0_4px_16px_rgba(16,185,129,0.4)]',
+      badge: 'Chủ Đề SGK',
+      badgeBg: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
     },
     {
       id: 'grammar',
       label: 'Ngữ Pháp Bẫy Đề',
+      desc: 'Chuyên đề thi vào 10',
       emoji: '⚡',
       icon: Zap,
-      activeGradient: 'from-amber-500 via-orange-400 to-amber-600',
-      activeShadow: 'shadow-[0_6px_0_#c2410c]',
-      inactiveBorder: 'border-amber-200 hover:border-amber-400',
+      activeGradient: 'from-amber-600 via-orange-600 to-red-500',
+      activeShadow: 'shadow-[0_4px_16px_rgba(245,158,11,0.4)]',
       badge: 'Trọng Tâm',
-      badgeBg: 'bg-amber-100 text-amber-900 border-amber-200'
+      badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/30'
     },
     {
       id: 'flashcards',
       label: 'Từ Vựng Vocab Master',
+      desc: '430 từ vựng & 4 chế độ',
       emoji: '🎴',
       icon: Sparkles,
-      activeGradient: 'from-rose-500 via-pink-400 to-rose-600',
-      activeShadow: 'shadow-[0_6px_0_#be123c]',
-      inactiveBorder: 'border-rose-200 hover:border-rose-400',
+      activeGradient: 'from-purple-600 via-pink-600 to-rose-500',
+      activeShadow: 'shadow-[0_4px_16px_rgba(168,85,247,0.4)]',
       badge: '430 Từ',
-      badgeBg: 'bg-rose-100 text-rose-900 border-rose-200'
+      badgeBg: 'bg-purple-500/20 text-purple-300 border-purple-500/30'
     },
     {
       id: 'vocab-game',
-      label: 'Game Đấu Trường',
+      label: 'Đấu Trường Game',
+      desc: 'Speed Quiz & Đánh Boss',
       emoji: '⚔️',
       icon: Swords,
-      activeGradient: 'from-purple-600 via-indigo-500 to-purple-700',
-      activeShadow: 'shadow-[0_6px_0_#4338ca]',
-      inactiveBorder: 'border-purple-200 hover:border-purple-400',
+      activeGradient: 'from-violet-600 via-indigo-600 to-blue-600',
+      activeShadow: 'shadow-[0_4px_16px_rgba(124,58,237,0.4)]',
       badge: 'HOT 🔥',
-      badgeBg: 'bg-amber-100 text-amber-900 border-amber-300'
+      badgeBg: 'bg-rose-500/20 text-rose-300 border-rose-500/30'
     },
     {
       id: 'exam',
-      label: 'Thi Vào 10',
+      label: 'Thi Vào 10 THPT',
+      desc: 'Đề chuẩn BGD 60 phút',
       emoji: '🏆',
       icon: Award,
-      activeGradient: 'from-amber-500 via-yellow-400 to-amber-600',
-      activeShadow: 'shadow-[0_6px_0_#b45309]',
-      inactiveBorder: 'border-yellow-200 hover:border-yellow-400',
-      badge: 'Đề Thi',
-      badgeBg: 'bg-amber-100 text-amber-900 border-amber-200'
+      activeGradient: 'from-amber-500 via-yellow-500 to-orange-500',
+      activeShadow: 'shadow-[0_4px_16px_rgba(245,158,11,0.4)]',
+      badge: 'Đề Thi 10',
+      badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/30'
     },
     {
       id: 'writing',
-      label: 'Chấm Bài Viết',
+      label: 'Chấm Bài Viết & Nói AI',
+      desc: '#SUAVIET & Phát Âm IPA',
       emoji: '✍️',
       icon: FileText,
-      activeGradient: 'from-indigo-600 via-purple-500 to-indigo-700',
-      activeShadow: 'shadow-[0_6px_0_#6b21a8]',
-      inactiveBorder: 'border-indigo-200 hover:border-indigo-400',
+      activeGradient: 'from-blue-600 via-cyan-600 to-teal-500',
+      activeShadow: 'shadow-[0_4px_16px_rgba(6,182,212,0.4)]',
       badge: '#SUAVIET',
-      badgeBg: 'bg-indigo-100 text-indigo-900 border-indigo-200'
+      badgeBg: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30'
     },
     {
       id: 'diagnostic',
-      label: 'Lỗ Hổng Kiến Thức',
+      label: 'Chẩn Đoán Lỗ Hổng',
+      desc: '#LOHONG kiến thức 9',
       emoji: '🔍',
       icon: AlertCircle,
-      activeGradient: 'from-red-500 via-rose-400 to-red-600',
-      activeShadow: 'shadow-[0_6px_0_#b91c1c]',
-      inactiveBorder: 'border-red-200 hover:border-red-400',
+      activeGradient: 'from-rose-600 via-red-600 to-orange-500',
+      activeShadow: 'shadow-[0_4px_16px_rgba(244,63,94,0.4)]',
       badge: '#LOHONG',
-      badgeBg: 'bg-red-100 text-red-900 border-red-200'
+      badgeBg: 'bg-rose-500/20 text-rose-300 border-rose-500/30'
     },
   ];
 
   return (
     <>
+      {mobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden" 
+          onClick={() => setMobileMenuOpen(false)} 
+        />
+      )}
       {/* Mobile Top Header Bar */}
-      <div className="lg:hidden bg-gradient-to-r from-amber-50/90 via-pink-50/90 to-sky-50/90 backdrop-blur-md border-b-2 border-amber-200/80 p-3 sticky top-0 z-50 flex items-center justify-between shadow-md">
+      <div className="lg:hidden bg-slate-900/95 backdrop-blur-md border-b border-slate-800 p-3 sticky top-0 z-50 flex items-center justify-between shadow-md">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-400 via-pink-400 to-indigo-500 p-0.5 shadow-[0_3px_0_#d97706]">
-            <div className="w-full h-full bg-white rounded-[10px] flex items-center justify-center text-lg">
-              🦉
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 via-cyan-400 to-emerald-400 p-0.5 shadow-md">
+            <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center text-base font-black text-cyan-400">
+              E9
             </div>
           </div>
           <div>
-            <h1 className="font-black text-sm text-slate-800 flex items-center gap-1">
-              GIA SƯ CHIBI 9 <span className="text-[9px] bg-amber-300 text-amber-950 font-black px-1.5 py-0.2 rounded-full">AI</span>
+            <h1 className="font-black text-sm text-white flex items-center gap-1.5">
+              ENGLISH MASTER 9
+              <span className="text-[9px] bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold px-1.5 py-0.2 rounded-full">
+                GS9
+              </span>
             </h1>
           </div>
         </div>
 
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="p-2 bg-white border-2 border-amber-300 rounded-xl text-slate-800 shadow-[0_3px_0_#fde68a] font-black text-xs flex items-center gap-1 active:translate-y-0.5"
+          className="p-2 bg-slate-800 border border-slate-700 rounded-xl text-white font-bold text-xs flex items-center gap-1.5 active:scale-95 transition-transform"
         >
-          {mobileMenuOpen ? <X className="w-5 h-5 text-rose-500" /> : <Menu className="w-5 h-5 text-indigo-600" />}
-          <span>{mobileMenuOpen ? 'Đóng' : 'Menu Tabs'}</span>
+          {mobileMenuOpen ? <X className="w-5 h-5 text-rose-400" /> : <Menu className="w-5 h-5 text-cyan-400" />}
+          <span>{mobileMenuOpen ? 'Đóng' : 'Menu'}</span>
         </button>
       </div>
 
-      {/* Vertical 3D Box Sidebar Navigation Container */}
+      {/* Vertical Sleek EdTech Sidebar */}
       <aside
-        className={`fixed lg:sticky top-0 left-0 h-screen w-72 bg-gradient-to-b from-[#fffbf2]/95 via-[#fef5f9]/95 to-[#f2f7ff]/95 backdrop-blur-md border-r-2 border-amber-200/90 p-4 flex flex-col justify-between z-50 transition-transform duration-300 overflow-y-auto ${
+        className={`fixed lg:sticky top-0 left-0 h-screen w-64 bg-slate-900 border-r border-slate-800/80 p-4 flex flex-col justify-between z-50 transition-transform duration-300 overflow-y-auto no-scrollbar shadow-xl ${
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
         <div className="space-y-4">
-          {/* Brand Chibi Mascot 3D Box Header */}
-          <div className="bg-gradient-to-b from-white to-amber-50 p-3.5 rounded-3xl border-2 border-amber-300 shadow-[0_5px_0_#fcd34d] flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-400 via-pink-400 to-indigo-500 p-0.5 shadow-[0_3px_0_#d97706] shrink-0 hover:scale-105 transition-transform">
-              <div className="w-full h-full bg-amber-50 rounded-[14px] flex items-center justify-center font-black text-2xl">
-                🦉
+          {/* Brand Header */}
+          <div className="bg-gradient-to-br from-slate-950 to-indigo-950/80 p-3.5 rounded-2xl border border-indigo-500/30 shadow-lg flex items-center gap-3">
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-indigo-500 via-cyan-400 to-emerald-400 p-0.5 shadow-md shrink-0">
+              <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center font-black text-lg text-cyan-400">
+                E9
               </div>
             </div>
             <div>
-              <h1 className="font-black text-base text-slate-800 tracking-tight flex items-center gap-1">
-                GIA SƯ CHIBI 9
-                <span className="text-[9px] bg-amber-400 text-slate-950 font-black px-1.5 py-0.5 rounded-full uppercase">
-                  SOCRATIC
-                </span>
+              <h1 className="font-black text-base text-white tracking-tight flex items-center gap-1.5">
+                ENGLISH MASTER 9
               </h1>
-              <p className="text-[11px] text-pink-600 font-bold">✨ Học vui say mê • Thi vào 10 ✨</p>
+              <p className="text-[11px] text-cyan-400 font-semibold flex items-center gap-1">
+                <Target className="w-3 h-3" /> Ôn Thi Vào 10 THPT
+              </p>
             </div>
           </div>
 
-          {/* Student Auth & Leaderboard Card Box */}
+          {/* Student Profile Card */}
           <div className="space-y-2">
             {currentStudent ? (
-              <div className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-3 rounded-2xl border-2 border-blue-300 shadow-[0_4px_0_#1d4ed8] space-y-2">
+              <div className="bg-gradient-to-br from-indigo-950 via-slate-900 to-slate-950 text-white p-3 rounded-2xl border border-indigo-500/40 shadow-md space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center font-black text-base">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center font-black text-cyan-300 text-sm">
                       👤
                     </div>
                     <div>
-                      <p className="font-black text-xs">{currentStudent.fullName}</p>
-                      <p className="text-[10px] text-blue-200">{currentStudent.className} • {currentStudent.schoolName}</p>
+                      <p className="font-black text-xs text-white">{currentStudent.fullName}</p>
+                      <p className="text-[10px] text-slate-400">{currentStudent.className} • {currentStudent.schoolName}</p>
                     </div>
                   </div>
                   <button
                     onClick={onLogoutStudent}
                     title="Đăng xuất tài khoản"
-                    className="p-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-white font-bold"
+                    className="p-1.5 bg-slate-800 hover:bg-rose-500/20 hover:text-rose-400 rounded-lg text-slate-400 transition-colors"
                   >
-                    <LogOut className="w-3.5 h-3.5" />
+                    <LogOut className="w-4 h-4" />
                   </button>
                 </div>
-                <div className="flex justify-between text-[10px] bg-black/20 px-2.5 py-1 rounded-xl font-mono">
-                  <span>⏱️ {currentStudent.totalStudyMinutes} phút học</span>
-                  <span>🏆 {currentStudent.examHighestScore}đ</span>
+
+                <div className="grid grid-cols-2 gap-1.5 text-[11px] bg-slate-950/60 p-2 rounded-xl border border-slate-800 font-mono">
+                  <div className="flex items-center gap-1 text-amber-400 font-bold">
+                    <Flame className="w-3.5 h-3.5 text-orange-500" />
+                    <span>{currentStudent.totalStudyMinutes} phút học</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-emerald-400 font-bold justify-end">
+                    <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
+                    <span>{currentStudent.examHighestScore}đ Thi 10</span>
+                  </div>
                 </div>
               </div>
             ) : (
               <button
                 onClick={onOpenAuthModal}
-                className="w-full py-2.5 bg-blue-600 text-white font-black rounded-2xl text-xs shadow-[0_4px_0_#1d4ed8] hover:bg-blue-500 active:translate-y-0.5 active:shadow-none transition-all flex items-center justify-center gap-1.5 border-2 border-blue-300"
+                className="w-full py-2.5 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-black rounded-2xl text-xs shadow-md active:scale-95 transition-all flex items-center justify-center gap-2 border border-indigo-400/30"
               >
-                <User className="w-4 h-4 text-amber-300" />
-                <span>👤 ĐĂNG NHẬP / ĐĂNG KÝ HỌC SINH</span>
+                <User className="w-4 h-4 text-cyan-300" />
+                <span>ĐĂNG NHẬP / ĐĂNG KÝ HỌC SINH</span>
               </button>
             )}
 
             <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={onOpenLeaderboardModal}
-                className="py-2 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black rounded-xl text-[11px] shadow-[0_3px_0_#d97706] flex items-center justify-center gap-1 border border-amber-500 active:translate-y-0.5"
+                className="py-2 bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold rounded-xl text-[11px] border border-amber-500/30 flex items-center justify-center gap-1.5 transition-colors"
               >
-                <Trophy className="w-3.5 h-3.5" /> Bảng Thi Đua
+                <Trophy className="w-3.5 h-3.5" /> Bảng Vàng
               </button>
               <button
                 onClick={onOpenTeacherAdminPortal}
-                className="py-2 bg-purple-600 hover:bg-purple-500 text-white font-black rounded-xl text-[11px] shadow-[0_3px_0_#6b21a8] flex items-center justify-center gap-1 border border-purple-400 active:translate-y-0.5"
+                className="py-2 bg-slate-800 hover:bg-slate-700 text-cyan-400 font-bold rounded-xl text-[11px] border border-cyan-500/30 flex items-center justify-center gap-1.5 transition-colors"
               >
-                <ShieldCheck className="w-3.5 h-3.5 text-amber-300" /> Quản Trị GV
+                <ShieldCheck className="w-3.5 h-3.5" /> Quản Trị GV
               </button>
             </div>
           </div>
 
-          {/* Unit Selector & Sound 3D Box Controls */}
-          <div className="bg-white p-3 rounded-2xl border-2 border-amber-200 shadow-[0_4px_0_#fde68a] space-y-2 text-xs">
+          {/* Unit Selector & Audio Toggle */}
+          <div className="bg-slate-950/70 p-3 rounded-2xl border border-slate-800 space-y-2 text-xs">
             <div className="flex items-center justify-between">
-              <span className="font-bold text-slate-700">Bài học SGK:</span>
+              <span className="font-bold text-slate-300">Bài học SGK:</span>
               <select
                 value={selectedUnit}
                 onChange={(e) => setSelectedUnit(Number(e.target.value))}
-                className="bg-indigo-600 text-amber-300 font-black text-xs px-2.5 py-1 rounded-xl border-2 border-indigo-400 shadow-[0_2px_0_#3730a3] outline-none cursor-pointer"
+                className="bg-indigo-950 text-cyan-300 font-black text-xs px-2.5 py-1 rounded-xl border border-indigo-500/50 outline-none cursor-pointer"
               >
                 {Array.from({ length: 12 }, (_, i) => i + 1).map((u) => (
                   <option key={u} value={u}>
@@ -243,14 +261,14 @@ export const Navbar: React.FC<NavbarProps> = ({
               </select>
             </div>
 
-            <div className="flex items-center justify-between pt-1.5 border-t border-slate-100">
-              <span className="font-medium text-slate-600">Giọng đọc AI:</span>
+            <div className="flex items-center justify-between pt-1.5 border-t border-slate-800">
+              <span className="font-medium text-slate-400">Giọng đọc AI:</span>
               <button
                 onClick={() => setTtsEnabled(!ttsEnabled)}
-                className={`px-3 py-1 rounded-xl text-[11px] font-black transition-all border-2 ${
+                className={`px-3 py-1 rounded-xl text-[11px] font-bold transition-all border ${
                   ttsEnabled
-                    ? 'bg-emerald-500 text-white border-emerald-400 shadow-[0_2.5px_0_#047857]'
-                    : 'bg-slate-100 text-slate-600 border-slate-300 shadow-[0_2px_0_#cbd5e1]'
+                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                    : 'bg-slate-800 text-slate-400 border-slate-700'
                 }`}
               >
                 {ttsEnabled ? '🔊 Bật âm thanh' : '🔇 Tắt âm thanh'}
@@ -258,14 +276,14 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
           </div>
 
-          {/* 3D Tactile Hộp Tabs Navigation List */}
-          <div className="space-y-2">
-            <p className="text-[11px] font-black uppercase tracking-wider text-amber-900/70 px-1 flex items-center justify-between">
-              <span>Danh Mục Tính Năng (Tabs)</span>
-              <span className="text-[10px] text-pink-600 font-bold">8 Hộp 3D</span>
+          {/* Navigation List */}
+          <div className="space-y-1.5">
+            <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 px-1 flex items-center justify-between">
+              <span>Danh Mục Học Tập</span>
+              <span className="text-cyan-400">8 Tính Năng</span>
             </p>
 
-            <nav className="space-y-2">
+            <nav className="space-y-1.5">
               {tabs.map((tab) => {
                 const isActive = activeTab === tab.id;
 
@@ -276,31 +294,21 @@ export const Navbar: React.FC<NavbarProps> = ({
                       setActiveTab(tab.id);
                       setMobileMenuOpen(false);
                     }}
-                    className={`w-full p-2.5 rounded-2xl text-xs font-black transition-all flex items-center justify-between border-2 cursor-pointer active:translate-y-1 active:shadow-none ${
+                    className={`w-full p-2.5 rounded-2xl text-xs font-bold transition-all flex items-center justify-between border cursor-pointer active:scale-98 ${
                       isActive
-                        ? `bg-gradient-to-r ${tab.activeGradient} text-white border-white/90 ${tab.activeShadow} translate-y-[-2px] ring-2 ring-amber-300/80`
-                        : `bg-gradient-to-b from-white via-amber-50/40 to-slate-50 text-slate-800 ${tab.inactiveBorder} shadow-[0_4px_0_#cbd5e1] hover:shadow-[0_6px_0_#94a3b8] hover:translate-y-[-2px]`
+                        ? `bg-gradient-to-r ${tab.activeGradient} text-white border-white/40 ${tab.activeShadow} translate-x-1`
+                        : `bg-slate-950/40 text-slate-300 border-slate-800/80 hover:bg-slate-800 hover:text-white hover:border-slate-700`
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
-                      <span className="text-xl leading-none drop-shadow-xs">{tab.emoji}</span>
-                      <span className="tracking-tight text-left leading-tight">{tab.label}</span>
+                      <span className="text-lg leading-none">{tab.emoji}</span>
+                      <div className="text-left">
+                        <div className="leading-tight font-extrabold">{tab.label}</div>
+                        <div className={`text-[10px] ${isActive ? 'text-white/80' : 'text-slate-500'}`}>{tab.desc}</div>
+                      </div>
                     </div>
 
-                    <div className="flex items-center gap-1">
-                      {tab.badge && (
-                        <span
-                          className={`text-[9px] px-1.5 py-0.5 rounded-full font-black uppercase tracking-wider border ${
-                            isActive
-                              ? 'bg-amber-300 text-slate-950 border-amber-400 shadow-xs'
-                              : tab.badgeBg
-                          }`}
-                        >
-                          {tab.badge}
-                        </span>
-                      )}
-                      <ChevronRight className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
-                    </div>
+                    <ChevronRight className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-600'}`} />
                   </button>
                 );
               })}
@@ -308,10 +316,10 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
 
-        {/* 3D Sidebar Footer Badge */}
-        <div className="pt-3 border-t border-amber-200/80 text-center">
-          <div className="bg-amber-100/90 text-amber-950 font-black text-[10px] px-3 py-1.5 rounded-2xl border-2 border-amber-300 shadow-[0_2.5px_0_#fcd34d] inline-block">
-            🎀 Created by Mrs Nhan DakHa • Lớp 9 Global Success
+        {/* Footer Credit */}
+        <div className="pt-3 border-t border-slate-800 text-center">
+          <div className="bg-slate-950 text-slate-400 font-semibold text-[10px] px-3 py-1.5 rounded-xl border border-slate-800 inline-block">
+            🏆 Created by Mrs Nhan DakHa • SGK Global Success 9
           </div>
         </div>
       </aside>

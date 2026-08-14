@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AlertCircle, CheckCircle2, Sparkles, RefreshCw, ArrowRight, Zap, BookOpen } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Sparkles, RefreshCw, ArrowRight, Zap, BookOpen, ShieldAlert } from 'lucide-react';
 import { LearningGap } from '../types';
 
 interface DiagnosticStudioProps {
@@ -65,7 +65,6 @@ export const DiagnosticStudio: React.FC<DiagnosticStudioProps> = ({ onAskTutor }
       setReport(data);
     } catch (err) {
       console.error(err);
-      // Fallback local diagnostic report if server fails
       setReport({
         gaps: [
           {
@@ -97,16 +96,16 @@ export const DiagnosticStudio: React.FC<DiagnosticStudioProps> = ({ onAskTutor }
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
+    <div className="max-w-7xl mx-auto space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-slate-900 via-cyan-950 to-indigo-950 text-white p-6 rounded-2xl border border-slate-800 shadow-md">
+      <div className="bg-slate-900 text-white p-6 rounded-2xl border border-slate-800 shadow-md">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <span className="bg-cyan-400 text-slate-950 font-bold text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider mb-2 inline-block">
+            <span className="bg-rose-500/20 text-rose-300 font-bold text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider border border-rose-500/30 mb-2 inline-block">
               Lệnh Nhanh #LOHONG
             </span>
             <h1 className="text-2xl font-black text-white flex items-center gap-2">
-              <AlertCircle className="w-6 h-6 text-cyan-400" /> Chẩn Đoán Lỗ Hổng Kiến Thức Tiếng Anh 9
+              <AlertCircle className="w-6 h-6 text-rose-400" /> Chẩn Đoán Lỗ Hổng Kiến Thức Tiếng Anh 9
             </h1>
             <p className="text-slate-300 text-sm mt-1">
               Bài test chẩn đoán giúp phát hiện chính xác lỗ hổng ngữ pháp/từ vựng và lập lộ trình khắc phục hiệu quả cho thi vào 10.
@@ -115,7 +114,7 @@ export const DiagnosticStudio: React.FC<DiagnosticStudioProps> = ({ onAskTutor }
 
           <button
             onClick={() => onAskTutor(`#LOHONG Hãy chạy bài test chẩn đoán lỗ hổng kiến thức toàn bộ 12 Unit SGK 9 giúp em!`)}
-            className="bg-cyan-600 hover:bg-cyan-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow-sm shrink-0 transition-transform active:scale-95"
+            className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow-md shrink-0 transition-all border border-indigo-400/30 active:scale-95"
           >
             <span>Hỏi Gia Sư AI Chẩn Đoán Toàn Diện</span>
             <ArrowRight className="w-4 h-4" />
@@ -124,29 +123,29 @@ export const DiagnosticStudio: React.FC<DiagnosticStudioProps> = ({ onAskTutor }
       </div>
 
       {/* Quiz Area */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-6">
-        <div className="border-b pb-3 flex items-center justify-between">
-          <h2 className="font-bold text-slate-900 text-base">Bài Kiểm Tra Chẩn Đoán Nhanh (4 Câu Trọng Tâm)</h2>
-          <span className="text-xs text-slate-500">Chọn đáp án rồi bấm "Phân Tích Lỗ Hổng"</span>
+      <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-md space-y-6">
+        <div className="border-b border-slate-800 pb-3 flex items-center justify-between">
+          <h2 className="font-black text-white text-base">Bài Kiểm Tra Chẩn Đoán Nhanh (4 Câu Trọng Tâm)</h2>
+          <span className="text-xs text-slate-400">Chọn đáp án rồi bấm "Phân Tích Lỗ Hổng"</span>
         </div>
 
         <div className="space-y-4">
           {sampleDiagnosticQuiz.map((q, idx) => (
-            <div key={q.id} className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3 text-xs">
+            <div key={q.id} className="p-4 bg-slate-950 border border-slate-800 rounded-xl space-y-3 text-xs">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-slate-900 text-sm">Câu {idx + 1}: {q.topic}</span>
+                <span className="font-bold text-cyan-300 text-sm">Câu {idx + 1}: {q.topic}</span>
               </div>
-              <p className="font-semibold text-slate-800 text-sm">{q.question}</p>
+              <p className="font-bold text-white text-sm">{q.question}</p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {q.options.map((opt, oIdx) => (
                   <button
                     key={oIdx}
                     onClick={() => setQuizAnswers(prev => ({ ...prev, [q.id]: opt }))}
-                    className={`p-2.5 rounded-lg border text-left font-medium transition-all ${
+                    className={`p-3 rounded-xl border text-left font-medium transition-all ${
                       quizAnswers[q.id] === opt
-                        ? 'bg-blue-600 border-blue-600 text-white font-bold'
-                        : 'bg-white border-slate-200 text-slate-800 hover:bg-slate-100'
+                        ? 'bg-indigo-600 border-indigo-400 text-white font-bold shadow-md'
+                        : 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800'
                     }`}
                   >
                     {opt}
@@ -160,13 +159,13 @@ export const DiagnosticStudio: React.FC<DiagnosticStudioProps> = ({ onAskTutor }
         <button
           onClick={handleRunDiagnostic}
           disabled={loading}
-          className="w-full bg-cyan-600 hover:bg-cyan-700 disabled:bg-slate-300 text-white font-bold py-3 rounded-xl text-sm transition-all shadow-sm flex items-center justify-center gap-2"
+          className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-800 disabled:text-slate-600 text-white font-bold py-3.5 rounded-xl text-xs transition-all shadow-md flex items-center justify-center gap-2 border border-indigo-400/30"
         >
           {loading ? (
             <span>Đang Phân Tích Lỗ Hổng Kiến Thức...</span>
           ) : (
             <>
-              <Sparkles className="w-4 h-4 text-amber-300" />
+              <Sparkles className="w-4 h-4 text-cyan-300" />
               <span>Chạy Phân Tích Lỗ Hổng Kiến Thức (#LOHONG)</span>
             </>
           )}
@@ -175,40 +174,40 @@ export const DiagnosticStudio: React.FC<DiagnosticStudioProps> = ({ onAskTutor }
 
       {/* Diagnostic Report Result */}
       {report && (
-        <div className="bg-white p-6 rounded-2xl border-2 border-cyan-500 shadow-md space-y-6">
-          <div className="border-b pb-3">
-            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-emerald-600" /> Báo Cáo Chẩn Đoán Lỗ Hổng Kiến Thức (#LOHONG)
+        <div className="bg-slate-900 p-6 rounded-2xl border-2 border-indigo-500/80 shadow-md space-y-6">
+          <div className="border-b border-slate-800 pb-3">
+            <h2 className="text-lg font-black text-white flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5 text-emerald-400" /> Báo Cáo Chẩn Đoán Lỗ Hổng Kiến Thức (#LOHONG)
             </h2>
-            <p className="text-xs text-slate-500 mt-1">Đã phân tích dựa trên kết quả câu trả lời của em.</p>
+            <p className="text-xs text-slate-400 mt-1">Đã phân tích dựa trên kết quả câu trả lời của em.</p>
           </div>
 
           {/* Gaps List */}
           <div className="space-y-4">
             {report.gaps?.map((gap, idx) => (
-              <div key={idx} className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2 text-xs">
+              <div key={idx} className="p-4 bg-slate-950 border border-slate-800 rounded-xl space-y-2 text-xs">
                 <div className="flex items-center justify-between gap-2">
-                  <h3 className="font-bold text-slate-900 text-sm">{gap.topic}</h3>
+                  <h3 className="font-bold text-white text-sm">{gap.topic}</h3>
                   <span className={`px-2.5 py-0.5 rounded-full font-bold uppercase text-[10px] ${
                     gap.severity === 'Hoàn toàn mất gốc'
-                      ? 'bg-rose-100 text-rose-800 border border-rose-300'
+                      ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
                       : gap.severity === 'Thường xuyên nhầm'
-                      ? 'bg-amber-100 text-amber-800 border border-amber-300'
-                      : 'bg-blue-100 text-blue-800 border border-blue-300'
+                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                      : 'bg-indigo-500/20 text-cyan-300 border border-indigo-500/40'
                   }`}>
                     {gap.severity}
                   </span>
                 </div>
 
-                <p className="text-slate-700 font-medium"><strong>Nguyên nhân mắc lỗi:</strong> {gap.description}</p>
-                <div className="p-3 bg-cyan-50 border border-cyan-200 text-cyan-950 rounded-lg font-medium">
+                <p className="text-slate-300 font-medium"><strong className="text-slate-200">Nguyên nhân mắc lỗi:</strong> {gap.description}</p>
+                <div className="p-3 bg-indigo-950/60 border border-indigo-500/30 text-cyan-200 rounded-xl font-medium">
                   <strong>Hướng khắc phục:</strong> {gap.remedyAction}
                 </div>
 
                 {gap.recommendedExercises && (
                   <div className="space-y-1">
-                    <span className="font-bold text-slate-600 block">Bài tập củng cố khuyến nghị:</span>
-                    <ul className="list-disc list-inside space-y-1 text-slate-700">
+                    <span className="font-bold text-slate-400 block">Bài tập củng cố khuyến nghị:</span>
+                    <ul className="list-disc list-inside space-y-1 text-slate-300">
                       {gap.recommendedExercises.map((ex, eIdx) => (
                         <li key={eIdx}>{ex}</li>
                       ))}
@@ -220,16 +219,16 @@ export const DiagnosticStudio: React.FC<DiagnosticStudioProps> = ({ onAskTutor }
           </div>
 
           {/* Summary Roadmap */}
-          <div className="p-4 bg-indigo-50 border border-indigo-200 rounded-xl text-indigo-950 text-xs space-y-2">
-            <h3 className="font-bold text-indigo-900 text-sm flex items-center gap-1.5">
-              <BookOpen className="w-4 h-4 text-indigo-600" /> Lộ Trình Ôn Tập Khắc Phục (2-3 Tuần):
+          <div className="p-4 bg-indigo-950/80 border border-indigo-500/30 rounded-xl text-cyan-200 text-xs space-y-2">
+            <h3 className="font-black text-cyan-300 text-sm flex items-center gap-1.5">
+              <BookOpen className="w-4 h-4 text-indigo-400" /> Lộ Trình Ôn Tập Khắc Phục (2-3 Tuần):
             </h3>
             <p className="leading-relaxed font-medium">{report.summaryRoadmap}</p>
           </div>
 
           <button
             onClick={() => onAskTutor(`Dựa vào báo cáo lỗ hổng kiến thức này: "${report.summaryRoadmap}". Nhờ thầy thiết kế bài tập luyện chuyên biệt khắc phục từng lỗi giúp em nhé!`)}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl text-xs transition-colors flex items-center justify-center gap-2"
+            className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl text-xs transition-colors flex items-center justify-center gap-2 border border-indigo-400/30"
           >
             Yêu Cầu Gia Sư AI Gửi Bài Tập Khắc Phục Lỗ Hổng <ArrowRight className="w-4 h-4" />
           </button>

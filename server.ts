@@ -1,22 +1,33 @@
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
-import { GoogleGenAI } from "@google/genai";
+import { executeGeminiWithPool } from "./api/tutor/_pool";
 
 const app = express();
-const PORT = 3000;
+const PORT = parseInt(process.env.PORT || '3000', 10);
 
-app.use(express.json({ limit: "10mb" }));
-
-// Initialize Gemini API
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY || "",
-  httpOptions: {
-    headers: {
-      'User-Agent': 'aistudio-build',
+const rateLimitMap = new Map<string, { count: number, resetTime: number }>();
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api/')) {
+    const ip = req.ip || req.socket?.remoteAddress || 'unknown';
+    const now = Date.now();
+    let record = rateLimitMap.get(ip);
+    
+    if (!record || now > record.resetTime) {
+      record = { count: 0, resetTime: now + 60000 };
+    }
+    
+    record.count++;
+    rateLimitMap.set(ip, record);
+    
+    if (record.count > 30) {
+      return res.status(429).json({ error: 'Too many requests, please try again later.' });
     }
   }
+  next();
 });
+
+app.use(express.json({ limit: "10mb" }));
 
 // System prompt for Grade 9 English AI Tutor (Bám sát SGK Global Success 9 & Thi vào 10)
 const TUTOR_SYSTEM_PROMPT = `
@@ -29,6 +40,7 @@ QUY TẮC PHẢN HỒI QUAN TRỌNG:
    [TÀI LIỆU] - Tài liệu bổ trợ/bài học
    [BỔ TRỢ] - Kiến thức mở rộng hợp lý
    [THI VÀO 10] - Cảnh báo bẫy đề thi, cấu trúc trọng tâm thi vào 10
+   [BẪY ĐỀ] - Cảnh báo bẫy câu trắc nghiệm thi vào 10
    [LUYỆN TẬP MỚI] - Bài tập củng cố mới
    [NÂNG CAO] - Câu hỏi vận dụng cao
 3. Cấu trúc sửa lỗi bài làm của học sinh (#SUAVIET hoặc chữa câu):
@@ -71,16 +83,19 @@ app.post("/api/tutor/chat", async (req, res) => {
       parts: [{ text: message }]
     });
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.6-flash",
-      contents: contents,
-      config: {
-        systemInstruction: promptContext,
-        temperature: 0.7,
-      }
+    const replyText = await executeGeminiWithPool(async (ai) => {
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: contents,
+        config: {
+          systemInstruction: promptContext,
+          temperature: 0.7,
+        }
+      });
+      return response.text;
     });
 
-    res.json({ reply: response.text });
+    res.json({ reply: replyText });
   } catch (error: any) {
     console.error("Error in /api/tutor/chat:", error);
     res.status(500).json({ error: error.message || "Failed to generate tutor response." });
@@ -90,7 +105,7 @@ app.post("/api/tutor/chat", async (req, res) => {
 // Endpoint 2: Specialized Writing Analysis & Grading (#SUAVIET)
 app.post("/api/tutor/grade-writing", async (req, res) => {
   try {
-    const { topic, studentSubmission, targetWords } = req.body;
+    const { topic, studentSubmission } = req.body;
 
     const writingPrompt = `
 Hãy chấm và sửa bài viết Tiếng Anh Lớp 9 sau đây theo tiêu chuẩn định hướng Thi vào Lớp 10:
@@ -127,16 +142,18 @@ Yêu cầu đầu ra dạng JSON với cấu trúc chuẩn:
 }
 `;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.6-flash",
-      contents: writingPrompt,
-      config: {
-        responseMimeType: "application/json",
-        temperature: 0.3,
-      }
+    const parsedJson = await executeGeminiWithPool(async (ai) => {
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: writingPrompt,
+        config: {
+          responseMimeType: "application/json",
+          temperature: 0.3,
+        }
+      });
+      return JSON.parse(response.text || "{}");
     });
 
-    const parsedJson = JSON.parse(response.text || "{}");
     res.json(parsedJson);
   } catch (error: any) {
     console.error("Error in /api/tutor/grade-writing:", error);
@@ -147,7 +164,7 @@ Yêu cầu đầu ra dạng JSON với cấu trúc chuẩn:
 // Endpoint 3: Diagnostic Gap Analysis (#LOHONG)
 app.post("/api/tutor/diagnostic", async (req, res) => {
   try {
-    const { quizResults } = req.body; // array of { questionId, topic, isCorrect, userAns, correctAns }
+    const { quizResults } = req.body;
 
     const prompt = `
 Phân tích kết quả bài kiểm tra chẩn đoán Tiếng Anh Lớp 9 của học sinh:
@@ -168,24 +185,149 @@ Hãy đưa ra danh sách lỗ hổng kiến thức (#LOHONG) và lộ trình kh�
 }
 `;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.6-flash",
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        temperature: 0.3,
-      }
+    const parsedJson = await executeGeminiWithPool(async (ai) => {
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          temperature: 0.3,
+        }
+      });
+      return JSON.parse(response.text || "{}");
     });
 
-    res.json(JSON.parse(response.text || "{}"));
+    res.json(parsedJson);
   } catch (error: any) {
     console.error("Error in /api/tutor/diagnostic:", error);
     res.status(500).json({ error: error.message || "Failed to analyze diagnostic gaps." });
   }
 });
 
+// Endpoint 5: Lesson Teaching (Gia sư giảng bài theo Unit)
+app.post("/api/tutor/lesson-teach", async (req, res) => {
+  try {
+    const { unitId, lessonStep, studentResponses, unitTitle } = req.body;
+
+    const LESSON_SYSTEM_PROMPT = `
+Bạn là Gia Sư Tiếng Anh Lớp 9 chuyên giảng bài theo từng Unit SGK Global Success 9.
+Dạy theo quy trình sư phạm 5 bước: WARM-UP → VOCABULARY → GRAMMAR → PRACTICE → REVIEW.
+Dùng nhãn [SGK], [THI VÀO 10], [BẪY ĐỀ], [LUYỆN TẬP] tương ứng.
+Giữ giọng điệu thân thiện, động viên, phù hợp học sinh 14-15 tuổi.
+`;
+
+    let stepInstruction = '';
+    switch (lessonStep) {
+      case 'warmup': stepInstruction = `Thực hiện BƯỚC 1 - WARM-UP cho Unit ${unitId}: "${unitTitle}". Đặt 2 câu hỏi gợi mở.`; break;
+      case 'vocabulary': stepInstruction = `Thực hiện BƯỚC 2 - VOCABULARY cho Unit ${unitId}: "${unitTitle}". Giới thiệu 8-10 từ vựng trọng tâm.`; break;
+      case 'grammar': stepInstruction = `Thực hiện BƯỚC 3 - GRAMMAR cho Unit ${unitId}: "${unitTitle}". Trình bày ngữ pháp chủ đạo.`; break;
+      case 'practice': stepInstruction = `Thực hiện BƯỚC 4 - PRACTICE cho Unit ${unitId}: "${unitTitle}". Cho 5 câu bài tập.`; break;
+      case 'review': stepInstruction = `Thực hiện BƯỚC 5 - REVIEW cho Unit ${unitId}: "${unitTitle}". Tóm tắt và giao bài tập về nhà.`; break;
+      default: stepInstruction = `Giới thiệu Unit ${unitId}: "${unitTitle}".`;
+    }
+
+    const contents = [];
+    if (studentResponses && Array.isArray(studentResponses)) {
+      for (const msg of studentResponses) {
+        contents.push({ role: msg.role === 'user' ? 'user' : 'model', parts: [{ text: msg.text }] });
+      }
+    }
+    contents.push({ role: 'user', parts: [{ text: stepInstruction }] });
+
+    const replyText = await executeGeminiWithPool(async (ai) => {
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents,
+        config: { systemInstruction: LESSON_SYSTEM_PROMPT, temperature: 0.7 }
+      });
+      return response.text;
+    });
+
+    res.json({ reply: replyText });
+  } catch (error: any) {
+    console.error('Error in /api/tutor/lesson-teach:', error);
+    res.status(500).json({ error: error.message || 'Failed to generate lesson.' });
+  }
+});
+
+// Endpoint 6: Speaking Assessment (AI chấm phát âm)
+app.post("/api/tutor/assess-speaking", async (req, res) => {
+  try {
+    const { targetSentence, recognizedText, unitId } = req.body;
+
+    const unitContext = unitId ? `Unit ${unitId} SGK Global Success 9` : '';
+    const prompt = `
+Bạn là chuyên gia đánh giá phát âm Tiếng Anh cho học sinh Lớp 9 Việt Nam.
+CÂU MẪU: "${targetSentence}"
+HỌC SINH ĐỌC: "${recognizedText}"
+${unitContext}
+
+Đánh giá phát âm theo JSON:
+{
+  "accuracyScore": number (0-100),
+  "overallFeedback": "Nhận xét tổng quan",
+  "wordByWordAnalysis": [{"targetWord": "", "spokenWord": "", "isCorrect": boolean, "ipa": "", "issue": null, "tip": null}],
+  "commonMistakes": [],
+  "practiceRecommendation": "",
+  "encouragement": ""
+}
+`;
+
+    const parsedJson = await executeGeminiWithPool(async (ai) => {
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: { responseMimeType: 'application/json', temperature: 0.3 }
+      });
+      return JSON.parse(response.text || '{}');
+    });
+
+    res.json(parsedJson);
+  } catch (error: any) {
+    console.error('Error in /api/tutor/assess-speaking:', error);
+    res.status(500).json({ error: error.message || 'Failed to assess speaking.' });
+  }
+});
+
 async function startServer() {
-  // Vite middleware in development mode
+  // Endpoint 4: Google Sheets Proxy (mirror Vercel function)
+  app.get("/api/sheets/sync", (req, res) => {
+    const scriptUrl = process.env.GOOGLE_SHEETS_SCRIPT_URL;
+    res.json({
+      configured: !!scriptUrl,
+      message: scriptUrl ? 'Google Sheets script URL is configured.' : 'Google Sheets script URL is NOT configured.'
+    });
+  });
+
+  app.post("/api/sheets/sync", async (req, res) => {
+    const scriptUrl = process.env.GOOGLE_SHEETS_SCRIPT_URL;
+    if (!scriptUrl) {
+      return res.status(500).json({ error: 'GOOGLE_SHEETS_SCRIPT_URL environment variable is not set.' });
+    }
+
+    try {
+      const response = await fetch(scriptUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(req.body)
+      });
+
+      const responseData = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        return res.status(response.status).json({
+          error: 'Failed to sync with Google Sheets',
+          details: responseData
+        });
+      }
+      res.status(200).json(responseData);
+    } catch (error: any) {
+      console.error('Google Sheets sync error:', error);
+      res.status(500).json({ error: 'Internal server error', details: error.message });
+    }
+  });
+
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
       server: { middlewareMode: true },

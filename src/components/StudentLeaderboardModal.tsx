@@ -15,30 +15,30 @@ export const StudentLeaderboardModal: React.FC<StudentLeaderboardModalProps> = (
   const sheetsUrl = getGoogleSheetsUrl();
 
   return (
-    <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
-      <div className="bg-gradient-to-b from-[#fffbf2] via-white to-[#f2f7ff] rounded-3xl border-4 border-amber-300 shadow-[0_12px_0_#fcd34d] max-w-2xl w-full overflow-hidden relative">
+    <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
+      <div className="bg-slate-900 rounded-2xl border border-slate-800 shadow-2xl max-w-2xl w-full overflow-hidden relative text-white">
         {/* Header Bar */}
-        <div className="bg-gradient-to-r from-amber-400 via-orange-400 to-yellow-500 p-4 text-slate-950 flex items-center justify-between border-b-2 border-amber-300">
+        <div className="bg-slate-950 p-4 border-b border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <Trophy className="w-8 h-8 text-slate-950 shrink-0" />
+            <Trophy className="w-7 h-7 text-amber-400 shrink-0" />
             <div>
-              <h3 className="font-black text-base leading-tight">🏆 BẢNG VÀNG THI ĐỦA THỰC HỌC CHIBI 9</h3>
-              <p className="text-[11px] font-bold text-slate-900">Vinh Danh Học Sinh Tích Cực Ôn Thi Vào Lớp 10 THPT</p>
+              <h3 className="font-black text-base leading-tight text-white">🏆 BẢNG VÀNG THI ĐỦA HỌC SINH LỚP 9</h3>
+              <p className="text-[11px] font-semibold text-cyan-400">Vinh Danh Học Sinh Tích Cực Ôn Thi Vào Lớp 10 THPT</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 bg-white/80 hover:bg-white text-slate-800 rounded-xl font-bold border border-amber-300"
+            className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded-xl transition-colors font-bold"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Content Body */}
-        <div className="p-5 space-y-4 max-h-[75vh] overflow-y-auto">
-          <div className="flex items-center justify-between bg-amber-100/80 p-3 rounded-2xl border border-amber-300/80 text-xs">
-            <span className="font-bold text-amber-950 flex items-center gap-1.5">
-              <Users className="w-4 h-4 text-amber-700" /> Tổng số học sinh thực học: <strong>{students.length} học sinh</strong>
+        <div className="p-5 space-y-4 max-h-[75vh] overflow-y-auto no-scrollbar">
+          <div className="flex items-center justify-between bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs">
+            <span className="font-bold text-slate-300 flex items-center gap-1.5">
+              <Users className="w-4 h-4 text-cyan-400" /> Tổng số học sinh tham gia: <strong className="text-white">{students.length} học sinh</strong>
             </span>
 
             {sheetsUrl ? (
@@ -46,19 +46,19 @@ export const StudentLeaderboardModal: React.FC<StudentLeaderboardModalProps> = (
                 href={sheetsUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="bg-emerald-600 hover:bg-emerald-500 text-white font-black px-3 py-1.5 rounded-xl border border-emerald-400 shadow-xs flex items-center gap-1 text-[11px]"
+                className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl border border-emerald-400/30 shadow-md flex items-center gap-1 text-[11px]"
               >
                 <ExternalLink className="w-3.5 h-3.5" /> Xem Google Sheet Báo Cáo
               </a>
             ) : (
-              <span className="text-[11px] text-amber-800 italic">Đã bật tự động đồng bộ Drive</span>
+              <span className="text-[11px] text-slate-400 italic">Tự động đồng bộ Google Drive</span>
             )}
           </div>
 
           {/* Student Leaderboard Table */}
-          <div className="bg-white rounded-2xl border-2 border-amber-200 overflow-hidden shadow-xs">
+          <div className="bg-slate-950 rounded-xl border border-slate-800 overflow-hidden shadow-md">
             <table className="w-full text-left text-xs">
-              <thead className="bg-amber-100/80 border-b border-amber-200 text-amber-950 font-black">
+              <thead className="bg-slate-900 border-b border-slate-800 text-cyan-300 font-bold uppercase tracking-wider">
                 <tr>
                   <th className="p-3 text-center w-12">HẠNG</th>
                   <th className="p-3">HỌ VÀ TÊN</th>
@@ -68,30 +68,30 @@ export const StudentLeaderboardModal: React.FC<StudentLeaderboardModalProps> = (
                   <th className="p-3 text-center">ĐIỂM CAO</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 font-bold">
+              <tbody className="divide-y divide-slate-800 font-medium">
                 {students.map((std, idx) => {
-                  let rankBadge = <span className="font-black text-slate-500">#{idx + 1}</span>;
+                  let rankBadge = <span className="font-bold text-slate-400">#{idx + 1}</span>;
                   if (idx === 0) rankBadge = <span className="text-xl">🥇</span>;
                   if (idx === 1) rankBadge = <span className="text-xl">🥈</span>;
                   if (idx === 2) rankBadge = <span className="text-xl">🥉</span>;
 
                   return (
-                    <tr key={std.id} className={idx < 3 ? 'bg-amber-50/50' : 'hover:bg-slate-50'}>
-                      <td className="p-3 text-center font-black">{rankBadge}</td>
-                      <td className="p-3 text-slate-900 font-black flex items-center gap-1.5">
+                    <tr key={std.id} className={idx < 3 ? 'bg-indigo-950/40' : 'hover:bg-slate-900/60'}>
+                      <td className="p-3 text-center font-bold">{rankBadge}</td>
+                      <td className="p-3 text-white font-bold flex items-center gap-1.5">
                         <span>{std.fullName}</span>
                       </td>
-                      <td className="p-3 text-slate-600 text-[11px]">
-                        <div>{std.className} • {std.schoolName}</div>
-                        <div className="text-slate-400">{std.wardCommune}</div>
+                      <td className="p-3 text-slate-400 text-[11px]">
+                        <div className="text-slate-200">{std.className} • {std.schoolName}</div>
+                        <div className="text-slate-500">{std.wardCommune}</div>
                       </td>
-                      <td className="p-3 text-center text-indigo-600 font-black">
+                      <td className="p-3 text-center text-cyan-300 font-bold">
                         {std.totalStudyMinutes} phút
                       </td>
-                      <td className="p-3 text-center text-pink-600 font-black">
+                      <td className="p-3 text-center text-purple-400 font-bold">
                         {std.masteredVocabCount} từ
                       </td>
-                      <td className="p-3 text-center text-emerald-600 font-black">
+                      <td className="p-3 text-center text-emerald-400 font-bold">
                         {std.examHighestScore > 0 ? `${std.examHighestScore} đ` : 'Chưa thi'}
                       </td>
                     </tr>
