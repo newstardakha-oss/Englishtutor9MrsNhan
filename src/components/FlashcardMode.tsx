@@ -487,7 +487,7 @@ export const FlashcardMode: React.FC<FlashcardModeProps> = ({ selectedUnit, setS
               {currentCard && (
                 <div
                   onClick={() => setIsFlipped(!isFlipped)}
-                  className={`w-full min-h-[340px] bg-slate-900 rounded-3xl border-2 p-6 shadow-xl transition-all cursor-pointer flex flex-col justify-between items-center text-center relative overflow-hidden group ${
+                  className={`w-full min-h-[300px] sm:min-h-[340px] bg-slate-900 rounded-3xl border-2 p-4 sm:p-6 shadow-xl transition-all cursor-pointer flex flex-col justify-between items-center text-center relative overflow-hidden group ${
                     currentCardState.status === 'mastered'
                       ? 'border-emerald-500/60 bg-emerald-950/20'
                       : currentCardState.status === 'review'
@@ -660,11 +660,11 @@ export const FlashcardMode: React.FC<FlashcardModeProps> = ({ selectedUnit, setS
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-2 gap-3 md:gap-6">
             <div className="space-y-2.5">
               <h4 className="font-bold text-slate-400 text-xs uppercase tracking-wider flex items-center justify-between">
                 <span>Từ Tiếng Anh</span>
-                <span className="text-[11px] text-cyan-400 font-normal">Bấm để nghe phát âm</span>
+                <span className="text-[11px] text-cyan-400 font-normal hidden md:inline">Bấm để nghe phát âm</span>
               </h4>
 
               {roundVocab.map((item) => {
@@ -675,7 +675,7 @@ export const FlashcardMode: React.FC<FlashcardModeProps> = ({ selectedUnit, setS
                   <div
                     key={item.id}
                     onClick={() => !isMatched && handleSelectWord(item.id)}
-                    className={`p-3.5 rounded-2xl text-xs font-bold transition-all cursor-pointer flex items-center justify-between border ${
+                    className={`p-2 md:p-3.5 rounded-xl md:rounded-2xl text-[11px] md:text-xs font-bold transition-all cursor-pointer flex items-center justify-between border ${
                       isMatched
                         ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-300 opacity-60 pointer-events-none'
                         : isSelected
@@ -687,7 +687,7 @@ export const FlashcardMode: React.FC<FlashcardModeProps> = ({ selectedUnit, setS
                   >
                     <div className="flex items-center gap-2">
                       <span>{item.word}</span>
-                      {item.ipa && <span className="font-mono text-[11px] text-cyan-400 font-normal">{item.ipa}</span>}
+                      {item.ipa && <span className="font-mono text-[11px] text-cyan-400 font-normal hidden md:inline">{item.ipa}</span>}
                     </div>
 
                     {isMatched ? (
@@ -716,7 +716,7 @@ export const FlashcardMode: React.FC<FlashcardModeProps> = ({ selectedUnit, setS
                   <div
                     key={'meaning-' + item.id}
                     onClick={() => !isMatched && handleSelectMeaning(item.id)}
-                    className={`p-3.5 rounded-2xl text-xs font-bold transition-all cursor-pointer flex items-center justify-between border ${
+                    className={`p-2 md:p-3.5 rounded-xl md:rounded-2xl text-[11px] md:text-xs font-bold transition-all cursor-pointer flex items-center justify-between border ${
                       isMatched
                         ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-300 opacity-60 pointer-events-none'
                         : isSelected

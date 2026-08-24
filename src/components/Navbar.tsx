@@ -162,8 +162,10 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* Vertical Sleek EdTech Sidebar */}
       <aside
-        className={`fixed lg:sticky top-0 left-0 h-screen w-64 bg-slate-900 border-r border-slate-800/80 p-4 flex flex-col justify-between z-50 transition-transform duration-300 overflow-y-auto no-scrollbar shadow-xl ${
-          mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        className={`bg-slate-900 border-r border-slate-800/80 p-4 justify-between z-50 overflow-y-auto no-scrollbar shadow-xl ${
+          mobileMenuOpen
+            ? 'fixed inset-y-0 left-0 h-screen w-72 max-w-[85vw] flex flex-col transition-all duration-300 translate-x-0'
+            : 'hidden lg:flex lg:flex-col lg:sticky top-0 left-0 h-screen w-72'
         }`}
       >
         <div className="space-y-4">
@@ -231,13 +233,13 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={onOpenLeaderboardModal}
-                className="py-2 bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold rounded-xl text-[11px] border border-amber-500/30 flex items-center justify-center gap-1.5 transition-colors"
+                className="py-2.5 bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold rounded-xl text-xs border border-amber-500/30 flex items-center justify-center gap-1.5 transition-colors"
               >
                 <Trophy className="w-3.5 h-3.5" /> Bảng Vàng
               </button>
               <button
                 onClick={onOpenTeacherAdminPortal}
-                className="py-2 bg-slate-800 hover:bg-slate-700 text-cyan-400 font-bold rounded-xl text-[11px] border border-cyan-500/30 flex items-center justify-center gap-1.5 transition-colors"
+                className="py-2.5 bg-slate-800 hover:bg-slate-700 text-cyan-400 font-bold rounded-xl text-xs border border-cyan-500/30 flex items-center justify-center gap-1.5 transition-colors"
               >
                 <ShieldCheck className="w-3.5 h-3.5" /> Quản Trị GV
               </button>

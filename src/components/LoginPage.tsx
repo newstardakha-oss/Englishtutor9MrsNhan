@@ -8,6 +8,8 @@ interface LoginPageProps {
   onTeacherLogin: () => void;
 }
 
+
+
 export const LoginPage: React.FC<LoginPageProps> = ({ onStudentLogin, onTeacherLogin }) => {
   // Role selection: null = choosing, 'student', 'teacher'
   const [selectedRole, setSelectedRole] = useState<'student' | 'teacher' | null>(null);
@@ -129,24 +131,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onStudentLogin, onTeacherL
     }
   };
 
-  // ── Input component ──
-  const InputField = ({ icon: Icon, label, value, onChange, type = 'text', placeholder }: {
-    icon: React.ElementType; label: string; value: string;
-    onChange: (v: string) => void; type?: string; placeholder: string;
-  }) => (
-    <div className="space-y-1.5">
-      <label className="font-bold text-slate-300 text-xs flex items-center gap-1.5">
-        <Icon className="w-3.5 h-3.5 text-cyan-400" /> {label}
-      </label>
-      <input
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        className="w-full p-3 bg-slate-950/80 border border-slate-700/80 rounded-xl text-sm font-semibold text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition-all"
-      />
-    </div>
-  );
+
 
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4 relative overflow-hidden selection:bg-indigo-500 selection:text-white">
@@ -203,14 +188,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onStudentLogin, onTeacherL
               <h2 className="text-center text-lg font-black text-white mb-2">Chào mừng bạn đến lớp học!</h2>
               <p className="text-center text-xs text-slate-400 mb-8 font-medium">Vui lòng chọn vai trò của bạn để bắt đầu</p>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 {/* Student Role Card */}
                 <button
                   onClick={() => { setSelectedRole('student'); resetForm(); }}
-                  className="group relative bg-gradient-to-br from-slate-800/80 to-slate-900/80 hover:from-indigo-600/20 hover:to-cyan-600/10 border border-slate-700/60 hover:border-indigo-500/50 rounded-2xl p-6 text-center transition-all duration-300 hover:scale-[1.03] hover:shadow-lg hover:shadow-indigo-500/10 active:scale-[0.98]"
+                  className="group relative bg-gradient-to-br from-slate-800/80 to-slate-900/80 hover:from-indigo-600/20 hover:to-cyan-600/10 border border-slate-700/60 hover:border-indigo-500/50 rounded-2xl p-4 sm:p-6 text-center transition-all duration-300 hover:scale-[1.03] hover:shadow-lg hover:shadow-indigo-500/10 active:scale-[0.98]"
                 >
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:shadow-indigo-500/40 transition-shadow">
-                    <GraduationCap className="w-8 h-8 text-white" />
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 rounded-2xl bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:shadow-indigo-500/40 transition-shadow">
+                    <GraduationCap className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                   </div>
                   <h3 className="font-black text-white text-sm mb-1">HỌC SINH</h3>
                   <p className="text-[10px] text-slate-400 font-medium leading-relaxed">Đăng nhập hoặc đăng ký tài khoản học tập mới</p>
@@ -219,10 +204,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onStudentLogin, onTeacherL
                 {/* Teacher Role Card */}
                 <button
                   onClick={() => { setSelectedRole('teacher'); resetForm(); }}
-                  className="group relative bg-gradient-to-br from-slate-800/80 to-slate-900/80 hover:from-emerald-600/20 hover:to-teal-600/10 border border-slate-700/60 hover:border-emerald-500/50 rounded-2xl p-6 text-center transition-all duration-300 hover:scale-[1.03] hover:shadow-lg hover:shadow-emerald-500/10 active:scale-[0.98]"
+                  className="group relative bg-gradient-to-br from-slate-800/80 to-slate-900/80 hover:from-emerald-600/20 hover:to-teal-600/10 border border-slate-700/60 hover:border-emerald-500/50 rounded-2xl p-4 sm:p-6 text-center transition-all duration-300 hover:scale-[1.03] hover:shadow-lg hover:shadow-emerald-500/10 active:scale-[0.98]"
                 >
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:shadow-emerald-500/40 transition-shadow">
-                    <ShieldCheck className="w-8 h-8 text-white" />
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:shadow-emerald-500/40 transition-shadow">
+                    <ShieldCheck className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                   </div>
                   <h3 className="font-black text-white text-sm mb-1">GIÁO VIÊN</h3>
                   <p className="text-[10px] text-slate-400 font-medium leading-relaxed">Đăng nhập quản trị bằng mã PIN giáo viên</p>
@@ -293,7 +278,18 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onStudentLogin, onTeacherL
               {/* Login Form */}
               {activeTab === 'login' ? (
                 <form onSubmit={handleStudentLogin} className="p-5 space-y-4">
-                  <InputField icon={User} label="Tên đăng nhập:" value={username} onChange={setUsername} placeholder="Ví dụ: vanminh9a1" />
+                  <div className="space-y-1.5">
+                    <label className="font-bold text-slate-300 text-xs flex items-center gap-1.5">
+                      <User className="w-3.5 h-3.5 text-cyan-400" /> Tên đăng nhập:
+                    </label>
+                    <input
+                      type="text"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      placeholder="Ví dụ: vanminh9a1"
+                      className="w-full p-3 bg-slate-950/80 border border-slate-700/80 rounded-xl text-sm font-semibold text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30"
+                    />
+                  </div>
 
                   <div className="space-y-1.5">
                     <label className="font-bold text-slate-300 text-xs flex items-center gap-1.5">
@@ -339,17 +335,72 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onStudentLogin, onTeacherL
               ) : (
                 /* Register Form */
                 <form onSubmit={handleStudentRegister} className="p-5 space-y-3 max-h-[60vh] overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
-                  <InputField icon={UserCheck} label="Họ và tên học sinh:" value={fullName} onChange={setFullName} placeholder="Ví dụ: Nguyễn Văn Minh" />
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <InputField icon={BookOpen} label="Lớp:" value={className} onChange={setClassName} placeholder="9A1" />
-                    <InputField icon={School} label="Trường THCS:" value={schoolName} onChange={setSchoolName} placeholder="THCS Chu Văn An" />
+                  <div className="space-y-1.5">
+                    <label className="font-bold text-slate-300 text-xs flex items-center gap-1.5">
+                      <UserCheck className="w-3.5 h-3.5 text-cyan-400" /> Họ và tên học sinh:
+                    </label>
+                    <input
+                      type="text"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      placeholder="Ví dụ: Nguyễn Văn Minh"
+                      className="w-full p-3 bg-slate-950/80 border border-slate-700/80 rounded-xl text-sm font-semibold text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30"
+                    />
                   </div>
 
-                  <InputField icon={MapPin} label="Xã / Thị trấn:" value={wardCommune} onChange={setWardCommune} placeholder="Thị trấn Đắk Hà" />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <label className="font-bold text-slate-300 text-xs flex items-center gap-1.5">
+                        <BookOpen className="w-3.5 h-3.5 text-cyan-400" /> Lớp:
+                      </label>
+                      <input
+                        type="text"
+                        value={className}
+                        onChange={(e) => setClassName(e.target.value)}
+                        placeholder="9A1"
+                        className="w-full p-3 bg-slate-950/80 border border-slate-700/80 rounded-xl text-sm font-semibold text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="font-bold text-slate-300 text-xs flex items-center gap-1.5">
+                        <School className="w-3.5 h-3.5 text-cyan-400" /> Trường THCS:
+                      </label>
+                      <input
+                        type="text"
+                        value={schoolName}
+                        onChange={(e) => setSchoolName(e.target.value)}
+                        placeholder="THCS Chu Văn An"
+                        className="w-full p-3 bg-slate-950/80 border border-slate-700/80 rounded-xl text-sm font-semibold text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30"
+                      />
+                    </div>
+                  </div>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <InputField icon={User} label="Tên đăng nhập:" value={username} onChange={setUsername} placeholder="vanminh9a1" />
+                  <div className="space-y-1.5">
+                    <label className="font-bold text-slate-300 text-xs flex items-center gap-1.5">
+                      <MapPin className="w-3.5 h-3.5 text-cyan-400" /> Xã / Thị trấn:
+                    </label>
+                    <input
+                      type="text"
+                      value={wardCommune}
+                      onChange={(e) => setWardCommune(e.target.value)}
+                      placeholder="Thị trấn Đắk Hà"
+                      className="w-full p-3 bg-slate-950/80 border border-slate-700/80 rounded-xl text-sm font-semibold text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <label className="font-bold text-slate-300 text-xs flex items-center gap-1.5">
+                        <User className="w-3.5 h-3.5 text-cyan-400" /> Tên đăng nhập:
+                      </label>
+                      <input
+                        type="text"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        placeholder="vanminh9a1"
+                        className="w-full p-3 bg-slate-950/80 border border-slate-700/80 rounded-xl text-sm font-semibold text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30"
+                      />
+                    </div>
                     <div className="space-y-1.5">
                       <label className="font-bold text-slate-300 text-xs flex items-center gap-1.5">
                         <Lock className="w-3.5 h-3.5 text-cyan-400" /> Mật khẩu:
@@ -360,7 +411,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onStudentLogin, onTeacherL
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           placeholder="Tối thiểu 4 ký tự"
-                          className="w-full p-3 pr-10 bg-slate-950/80 border border-slate-700/80 rounded-xl text-sm font-semibold text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition-all"
+                          className="w-full p-3 pr-10 bg-slate-950/80 border border-slate-700/80 rounded-xl text-sm font-semibold text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30"
                         />
                         <button
                           type="button"
@@ -483,14 +534,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onStudentLogin, onTeacherL
           🦉 English Master 9 • Bám sát 12 Unit SGK Global Success • Powered by Gemini AI
         </p>
       </div>
-
-      {/* ═══ CSS Keyframes ═══ */}
-      <style>{`
-        @keyframes float {
-          0% { transform: translateY(0px) scale(1); opacity: 0.3; }
-          100% { transform: translateY(-30px) scale(1.5); opacity: 0.1; }
-        }
-      `}</style>
     </div>
   );
 };

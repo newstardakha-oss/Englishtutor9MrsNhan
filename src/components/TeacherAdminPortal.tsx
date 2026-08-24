@@ -61,11 +61,11 @@ export const TeacherAdminPortal: React.FC<TeacherAdminPortalProps> = ({ isOpen, 
     setTimeout(() => setSyncStatusMsg(''), 4000);
   };
 
-  const handleExecuteResetPassword = (e: React.FormEvent) => {
+  const handleExecuteResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!resetModalStudent || !newPassword.trim()) return;
 
-    const ok = resetStudentPasswordByTeacher(resetModalStudent.username, newPassword.trim());
+    const ok = await resetStudentPasswordByTeacher(resetModalStudent.username, newPassword.trim());
     if (ok) {
       setResetSuccessMsg(`Đã đổi mật khẩu học sinh ${resetModalStudent.fullName} thành "${newPassword.trim()}"!`);
       setStudents(getAllStudents());
@@ -223,8 +223,8 @@ export const TeacherAdminPortal: React.FC<TeacherAdminPortalProps> = ({ isOpen, 
             </div>
 
             {/* Student List Table */}
-            <div className="bg-slate-950 rounded-xl border border-slate-800 overflow-hidden shadow-md">
-              <table className="w-full text-left text-xs">
+            <div className="bg-slate-950 rounded-xl border border-slate-800 overflow-x-auto shadow-md">
+              <table className="w-full text-left text-xs min-w-[640px]">
                 <thead className="bg-slate-900 border-b border-slate-800 text-cyan-300 font-bold uppercase tracking-wider">
                   <tr>
                     <th className="p-3">HỌ VÀ TÊN</th>

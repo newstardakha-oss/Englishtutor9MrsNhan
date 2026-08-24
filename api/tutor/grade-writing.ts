@@ -44,9 +44,10 @@ Yêu cầu đầu ra dạng JSON với cấu trúc chuẩn:
 }
 `;
 
-    const parsedJson = await executeGeminiWithPool(async (ai) => {
+    const clientApiKey = (req.headers['x-gemini-api-key'] as string) || undefined;
+    const parsedJson = await executeGeminiWithPool(async (ai, model) => {
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: model,
         contents: writingPrompt,
         config: {
           responseMimeType: "application/json",
@@ -54,7 +55,7 @@ Yêu cầu đầu ra dạng JSON với cấu trúc chuẩn:
         }
       });
       return JSON.parse(response.text || "{}");
-    });
+    }, 'gemini-2.5-flash', clientApiKey);
 
     return res.status(200).json(parsedJson);
   } catch (error: any) {

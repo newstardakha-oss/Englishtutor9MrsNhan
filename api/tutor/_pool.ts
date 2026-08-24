@@ -36,12 +36,32 @@ export const MODEL_FALLBACK_CHAIN = ['gemini-2.5-flash', 'gemini-3-flash-preview
 
 export async function executeGeminiWithPool<T>(
   fn: (ai: GoogleGenAI, model: string) => Promise<T>,
-  model: string = 'gemini-2.5-flash'
+  model: string = 'gemini-2.5-flash',
+  clientApiKey?: string
 ): Promise<T> {
+  // If client provided an API key, try it first
+  if (clientApiKey) {
+    try {
+      const ai = new GoogleGenAI({
+        apiKey: clientApiKey,
+        httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
+      });
+      return await fn(ai, model);
+    } catch (err: any) {
+      const errMsg = safeErrorMessage(err);
+      console.warn(`[Gemini Client Key] Failed: ${errMsg.substring(0, 200)}`);
+      // Fall through to pool keys
+    }
+  }
+
   const pool = getApiKeysPool();
 
+  if (pool.length === 0 && !clientApiKey) {
+    throw new Error("Chưa cấu hình API Key. Vui lòng nhập API Key Gemini trong phần Cài đặt trên giao diện app, hoặc liên hệ giáo viên.");
+  }
+  
   if (pool.length === 0) {
-    throw new Error("Chưa cấu hình GEMINI_API_KEYS. Vui lòng liên hệ giáo viên để thiết lập API Key.");
+    throw new Error("API Key bạn nhập không hợp lệ hoặc đã hết quota. Vui lòng kiểm tra lại hoặc dùng API Key khác.");
   }
 
   let lastError: any = null;

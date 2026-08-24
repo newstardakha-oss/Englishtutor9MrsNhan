@@ -56,8 +56,8 @@ export const StudentLeaderboardModal: React.FC<StudentLeaderboardModalProps> = (
           </div>
 
           {/* Student Leaderboard Table */}
-          <div className="bg-slate-950 rounded-xl border border-slate-800 overflow-hidden shadow-md">
-            <table className="w-full text-left text-xs">
+          <div className="bg-slate-950 rounded-xl border border-slate-800 overflow-x-auto shadow-md">
+            <table className="w-full text-left text-xs min-w-[540px]">
               <thead className="bg-slate-900 border-b border-slate-800 text-cyan-300 font-bold uppercase tracking-wider">
                 <tr>
                   <th className="p-3 text-center w-12">HẠNG</th>

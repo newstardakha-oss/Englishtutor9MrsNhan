@@ -38,7 +38,7 @@ export const GrammarLab: React.FC<GrammarLabProps> = ({ onAskTutor }) => {
         </div>
 
         {/* Topic Selector Tabs */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2 mt-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2 mt-6">
           {GRAMMAR_TOPICS.map((topic) => {
             const isSelected = topic.id === selectedTopicId;
             return (
@@ -52,7 +52,7 @@ export const GrammarLab: React.FC<GrammarLabProps> = ({ onAskTutor }) => {
                 }`}
               >
                 <div className="text-[10px] text-amber-400 font-normal">Unit {topic.unit || 1}</div>
-                <div className="truncate font-extrabold">{topic.title.split('(')[0]}</div>
+                <div className="font-extrabold line-clamp-2">{topic.title.split('(')[0]}</div>
               </button>
             );
           })}

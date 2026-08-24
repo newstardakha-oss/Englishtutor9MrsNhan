@@ -539,12 +539,12 @@ export const VocabBattleGame: React.FC<VocabBattleGameProps> = ({ onAskTutor }) 
             </button>
           </div>
 
-          <div className="grid grid-cols-5 gap-2 bg-slate-950 p-4 rounded-2xl border border-slate-800">
+          <div className="grid grid-cols-5 gap-1.5 sm:gap-2 bg-slate-950 p-2.5 sm:p-4 rounded-2xl border border-slate-800">
             {board.map((cell, idx) => (
               <button
                 key={idx}
                 onClick={() => handleCellClick(idx)}
-                className={`h-12 sm:h-16 rounded-xl font-black text-xl flex items-center justify-center transition-all border ${
+                className={`h-10 sm:h-14 md:h-16 rounded-xl font-black text-base sm:text-xl flex items-center justify-center transition-all border ${
                   cell === 'X'
                     ? 'bg-indigo-600 text-white border-indigo-400'
                     : cell === 'O'

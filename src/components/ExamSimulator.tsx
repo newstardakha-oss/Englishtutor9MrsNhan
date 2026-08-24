@@ -192,7 +192,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onAskTutor }) => {
             <div
               id={`question-${q.id}`}
               key={q.id}
-              className={`p-5 rounded-2xl border transition-all ${
+              className={`scroll-mt-20 p-5 rounded-2xl border transition-all ${
                 submitted
                   ? isCorrect
                     ? 'bg-emerald-950/20 border-emerald-500/50'

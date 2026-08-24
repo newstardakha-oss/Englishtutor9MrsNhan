@@ -123,7 +123,7 @@ export const UnitExplorer: React.FC<UnitExplorerProps> = ({
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       {lessonMode ? (
-        <div className="flex flex-col h-[75vh]">
+        <div className="flex flex-col min-h-[480px] lg:h-[75vh]">
           {/* Lesson Header */}
           <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-4 mb-4 shadow-lg shrink-0">
             <div className="flex items-center justify-between mb-3">
@@ -245,7 +245,7 @@ export const UnitExplorer: React.FC<UnitExplorerProps> = ({
         </div>
 
         {/* 12 Units Quick Buttons */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-12 gap-2">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-12 gap-1.5">
           {UNITS_DATA.map((u) => {
             const isSelected = u.id === selectedUnit;
             return (

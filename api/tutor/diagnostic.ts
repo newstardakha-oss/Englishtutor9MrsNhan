@@ -28,9 +28,10 @@ Hãy đưa ra danh sách lỗ hổng kiến thức (#LOHONG) và lộ trình kh�
 }
 `;
 
-    const parsedJson = await executeGeminiWithPool(async (ai) => {
+    const clientApiKey = (req.headers['x-gemini-api-key'] as string) || undefined;
+    const parsedJson = await executeGeminiWithPool(async (ai, model) => {
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: model,
         contents: prompt,
         config: {
           responseMimeType: "application/json",
@@ -38,7 +39,7 @@ Hãy đưa ra danh sách lỗ hổng kiến thức (#LOHONG) và lộ trình kh�
         }
       });
       return JSON.parse(response.text || "{}");
-    });
+    }, 'gemini-2.5-flash', clientApiKey);
 
     return res.status(200).json(parsedJson);
   } catch (error: any) {

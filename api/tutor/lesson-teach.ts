@@ -81,9 +81,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
     contents.push({ role: 'user', parts: [{ text: stepInstruction }] });
 
-    const replyText = await executeGeminiWithPool(async (ai) => {
+    const clientApiKey = (req.headers['x-gemini-api-key'] as string) || undefined;
+    const replyText = await executeGeminiWithPool(async (ai, model) => {
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: model,
         contents: contents,
         config: {
           systemInstruction: LESSON_SYSTEM_PROMPT,
@@ -91,7 +92,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
       });
       return response.text;
-    });
+    }, 'gemini-2.5-flash', clientApiKey);
 
     return res.status(200).json({ reply: replyText });
   } catch (error: any) {

@@ -41,6 +41,7 @@ export const TutorChat: React.FC<TutorChatProps> = ({ selectedUnit, setSelectedU
   const [loading, setLoading] = useState(false);
   const [showHintModal, setShowHintModal] = useState(false);
   const [activeExercise, setActiveExercise] = useState<typeof SGK_SAMPLE_EXERCISES[0] | null>(null);
+  const [showMobileExercises, setShowMobileExercises] = useState(false);
   const [attachment, setAttachment] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -184,31 +185,39 @@ export const TutorChat: React.FC<TutorChatProps> = ({ selectedUnit, setSelectedU
   };
 
   return (
-    <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-5 h-[calc(100vh-6rem)]">
+    <div className="max-w-7xl mx-auto flex flex-col lg:grid lg:grid-cols-12 gap-4 lg:gap-5 h-auto lg:h-[calc(100vh-6rem)]">
       {/* Left Sidebar: Unit Knowledge & SGK Sample Exercises */}
-      <div className="lg:col-span-4 bg-slate-900 rounded-2xl border border-slate-800/90 shadow-lg flex flex-col overflow-hidden">
-        <div className="bg-gradient-to-r from-indigo-950 via-slate-900 to-slate-950 p-4 border-b border-slate-800">
-          <div className="flex items-center justify-between mb-2">
+      <div className="lg:col-span-4 bg-slate-900 rounded-2xl border border-slate-800/90 shadow-lg flex flex-col overflow-hidden shrink-0">
+        <div className="bg-gradient-to-r from-indigo-950 via-slate-900 to-slate-950 p-3.5 sm:p-4 border-b border-slate-800">
+          <div className="flex items-center justify-between gap-2 mb-2">
             <span className="text-[10px] font-bold text-cyan-300 uppercase tracking-wider bg-cyan-500/20 px-2 py-0.5 rounded border border-cyan-500/30">
               Unit {selectedUnit} SGK 9
             </span>
-            <select
-              value={selectedUnit}
-              onChange={(e) => setSelectedUnit(Number(e.target.value))}
-              className="bg-slate-800 text-cyan-300 text-xs px-2.5 py-1 rounded-xl border border-slate-700 font-bold outline-none cursor-pointer"
-            >
-              {UNITS_DATA.map((u) => (
-                <option key={u.id} value={u.id}>
-                  Unit {u.id}: {u.title}
-                </option>
-              ))}
-            </select>
+            <div className="flex items-center gap-2">
+              <select
+                value={selectedUnit}
+                onChange={(e) => setSelectedUnit(Number(e.target.value))}
+                className="bg-slate-800 text-cyan-300 text-xs px-2 py-1 rounded-xl border border-slate-700 font-bold outline-none cursor-pointer"
+              >
+                {UNITS_DATA.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    Unit {u.id}: {u.title}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={() => setShowMobileExercises(!showMobileExercises)}
+                className="lg:hidden p-1.5 bg-indigo-950 border border-indigo-500/40 text-cyan-300 rounded-xl text-xs font-bold"
+              >
+                {showMobileExercises ? 'Ẩn Bài Tập ▴' : 'Bài Tập ▾'}
+              </button>
+            </div>
           </div>
-          <h2 className="text-base font-black text-white">{currentUnitInfo?.title}</h2>
-          <p className="text-xs text-slate-400 mt-0.5">{currentUnitInfo?.theme}</p>
+          <h2 className="text-sm sm:text-base font-black text-white">{currentUnitInfo?.title}</h2>
+          <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5">{currentUnitInfo?.theme}</p>
         </div>
 
-        <div className="p-4 overflow-y-auto flex-1 space-y-4 no-scrollbar">
+        <div className={`p-4 overflow-y-auto flex-1 space-y-4 no-scrollbar ${showMobileExercises ? 'block' : 'hidden lg:block'}`}>
           {/* Summary Box */}
           <div className="bg-indigo-950/60 border border-indigo-500/30 rounded-2xl p-3.5 text-xs text-slate-300">
             <h3 className="font-bold text-cyan-300 flex items-center gap-1.5 mb-1.5 text-sm">
@@ -279,7 +288,7 @@ export const TutorChat: React.FC<TutorChatProps> = ({ selectedUnit, setSelectedU
       </div>
 
       {/* Right Main Chat Area */}
-      <div className="lg:col-span-8 bg-slate-900 rounded-2xl border border-slate-800/90 shadow-lg flex flex-col overflow-hidden">
+      <div className="flex-1 lg:col-span-8 bg-slate-900 rounded-2xl border border-slate-800/90 shadow-lg flex flex-col overflow-hidden h-[calc(100vh-13rem)] sm:h-[calc(100vh-8rem)] lg:h-full min-h-[450px]">
         {/* Chat Top Header */}
         <div className="bg-slate-950 p-3.5 px-4 flex items-center justify-between border-b border-slate-800">
           <div className="flex items-center gap-3">

@@ -36,9 +36,10 @@ Hãy phân tích và đánh giá phát âm theo JSON:
 }
 `;
 
-    const parsedJson = await executeGeminiWithPool(async (ai) => {
+    const clientApiKey = (req.headers['x-gemini-api-key'] as string) || undefined;
+    const parsedJson = await executeGeminiWithPool(async (ai, model) => {
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: model,
         contents: prompt,
         config: {
           responseMimeType: 'application/json',
@@ -46,7 +47,7 @@ Hãy phân tích và đánh giá phát âm theo JSON:
         }
       });
       return JSON.parse(response.text || '{}');
-    });
+    }, 'gemini-2.5-flash', clientApiKey);
 
     return res.status(200).json(parsedJson);
   } catch (error: any) {

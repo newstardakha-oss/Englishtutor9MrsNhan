@@ -1,20 +1,20 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
+const TutorChat = React.lazy(() => import('./components/TutorChat').then(m => ({ default: m.TutorChat })));
+const UnitExplorer = React.lazy(() => import('./components/UnitExplorer').then(m => ({ default: m.UnitExplorer })));
+const GrammarLab = React.lazy(() => import('./components/GrammarLab').then(m => ({ default: m.GrammarLab })));
+const FlashcardMode = React.lazy(() => import('./components/FlashcardMode').then(m => ({ default: m.FlashcardMode })));
+const VocabBattleGame = React.lazy(() => import('./components/VocabBattleGame').then(m => ({ default: m.VocabBattleGame })));
+const ExamSimulator = React.lazy(() => import('./components/ExamSimulator').then(m => ({ default: m.ExamSimulator })));
+const WritingSpeakingLab = React.lazy(() => import('./components/WritingSpeakingLab').then(m => ({ default: m.WritingSpeakingLab })));
+const DiagnosticStudio = React.lazy(() => import('./components/DiagnosticStudio').then(m => ({ default: m.DiagnosticStudio })));
 import { Navbar } from './components/Navbar';
-import { TutorChat } from './components/TutorChat';
-import { UnitExplorer } from './components/UnitExplorer';
-import { GrammarLab } from './components/GrammarLab';
-import { FlashcardMode } from './components/FlashcardMode';
-import { VocabBattleGame } from './components/VocabBattleGame';
-import { ExamSimulator } from './components/ExamSimulator';
-import { WritingSpeakingLab } from './components/WritingSpeakingLab';
-import { DiagnosticStudio } from './components/DiagnosticStudio';
 import { StudentAuthModal } from './components/StudentAuthModal';
 import { StudentLeaderboardModal } from './components/StudentLeaderboardModal';
 import { TeacherAdminPortal } from './components/TeacherAdminPortal';
 import { LoginPage } from './components/LoginPage';
 import { getCurrentStudent, logoutStudent, updateStudentProgress, getCurrentTeacher, logoutTeacher } from './utils/auth';
 import { StudentProfile } from './types';
-import { Clock, Sparkles, Star, Flame, Trophy, Award } from 'lucide-react';
+import { Sparkles, Award } from 'lucide-react';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<string>('chat');
@@ -23,7 +23,7 @@ export default function App() {
   const [pendingTutorQuery, setPendingTutorQuery] = useState<string>('');
 
   // Student Auth & Admin Modals State
-  const [currentStudent, setCurrentStudent] = useState<StudentProfile | null>(() => getCurrentStudent());
+  const [currentStudent, setCurrentStudent] = useState<StudentProfile | null>(null);
   const [isTeacherLoggedIn, setIsTeacherLoggedIn] = useState<boolean>(() => !!getCurrentTeacher());
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [leaderboardModalOpen, setLeaderboardModalOpen] = useState(false);
@@ -84,7 +84,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex font-sans selection:bg-indigo-500 selection:text-white relative overflow-x-hidden">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col lg:flex-row font-sans selection:bg-indigo-500 selection:text-white relative overflow-x-hidden w-full max-w-full">
       {/* Background ambient lighting glows */}
       <div className="fixed -top-40 -left-40 w-[600px] h-[600px] bg-indigo-600/15 rounded-full blur-[140px] pointer-events-none" />
       <div className="fixed top-1/3 -right-40 w-[600px] h-[600px] bg-cyan-600/15 rounded-full blur-[140px] pointer-events-none" />
@@ -106,11 +106,11 @@ export default function App() {
       />
 
       {/* Right Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 min-h-screen relative z-10">
+      <div className="flex-1 flex flex-col min-w-0 min-h-screen relative z-10 w-full max-w-full">
         {/* Top Professional Banner */}
-        <header className="bg-slate-900/90 backdrop-blur-md border-b border-slate-800/80 px-4 sm:px-6 py-2.5 flex items-center justify-between text-xs shadow-md">
-          <div className="flex items-center gap-3 font-bold">
-            <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black px-2.5 py-0.5 rounded-full text-[10px] uppercase shadow-sm flex items-center gap-1">
+        <header className="hidden lg:flex bg-slate-900/90 backdrop-blur-md border-b border-slate-800/80 px-3 sm:px-6 py-2 items-center justify-between text-xs shadow-md">
+          <div className="flex items-center gap-2 font-bold">
+            <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] uppercase shadow-sm flex items-center gap-1">
               <Award className="w-3 h-3" /> GLOBAL SUCCESS 9
             </span>
             <span className="hidden md:inline font-bold text-slate-300">
@@ -118,24 +118,31 @@ export default function App() {
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
-
-
+          <div className="flex items-center gap-2">
             {currentStudent ? (
-              <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold px-2.5 py-1 rounded-xl text-[11px] flex items-center gap-1">
-                👤 {currentStudent.fullName} ({currentStudent.className})
-              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-xl text-[10px] sm:text-[11px] flex items-center gap-1 truncate max-w-[150px] sm:max-w-none">
+                  👤 {currentStudent.fullName} ({currentStudent.className})
+                </span>
+                <button
+                  onClick={handleLogout}
+                  title="Đăng xuất về màn hình đăng nhập"
+                  className="bg-slate-800 hover:bg-rose-500/20 hover:text-rose-300 text-slate-400 font-bold px-2 py-0.5 sm:py-1 rounded-xl text-[10px] sm:text-[11px] transition-colors border border-slate-700"
+                >
+                  🚪 Đăng xuất
+                </button>
+              </div>
             ) : (
               <button
                 onClick={() => setAuthModalOpen(true)}
-                className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-1 rounded-xl text-[11px] shadow-sm transition-all border border-indigo-400/30"
+                className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-2.5 py-1 rounded-xl text-[10px] sm:text-[11px] shadow-sm transition-all border border-indigo-400/30"
               >
                 🔑 Đăng Nhập Học Sinh
               </button>
             )}
 
-            <div className="hidden sm:flex items-center gap-1.5 text-cyan-300 font-bold bg-indigo-950/80 px-3 py-1 rounded-xl border border-indigo-500/40">
-              <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+            <div className="flex items-center gap-1 text-cyan-300 font-bold bg-indigo-950/80 px-2 py-0.5 sm:px-3 sm:py-1 rounded-xl border border-indigo-500/40 text-[10px] sm:text-xs">
+              <Sparkles className="w-3 h-3 text-cyan-400" />
               <span>Unit {selectedUnit}</span>
             </div>
           </div>
@@ -143,55 +150,64 @@ export default function App() {
 
         {/* Dynamic Workspace Container */}
         <main className="flex-1 p-3 sm:p-5 lg:p-6">
-          {activeTab === 'chat' && (
-            <TutorChat
-              selectedUnit={selectedUnit}
-              setSelectedUnit={setSelectedUnit}
-              ttsEnabled={ttsEnabled}
-              pendingQuery={pendingTutorQuery}
-              onPendingQueryConsumed={() => setPendingTutorQuery('')}
-            />
-          )}
+          <Suspense fallback={
+            <div className="flex items-center justify-center h-64">
+              <div className="text-center">
+                <div className="w-10 h-10 border-3 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+                <p className="text-sm text-slate-400 font-semibold">Đang tải...</p>
+              </div>
+            </div>
+          }>
+            {activeTab === 'chat' && (
+              <TutorChat
+                selectedUnit={selectedUnit}
+                setSelectedUnit={setSelectedUnit}
+                ttsEnabled={ttsEnabled}
+                pendingQuery={pendingTutorQuery}
+                onPendingQueryConsumed={() => setPendingTutorQuery('')}
+              />
+            )}
 
-          {activeTab === 'sgk' && (
-            <UnitExplorer
-              selectedUnit={selectedUnit}
-              setSelectedUnit={setSelectedUnit}
-              onAskTutor={handleAskTutor}
-              ttsEnabled={ttsEnabled}
-            />
-          )}
+            {activeTab === 'sgk' && (
+              <UnitExplorer
+                selectedUnit={selectedUnit}
+                setSelectedUnit={setSelectedUnit}
+                onAskTutor={handleAskTutor}
+                ttsEnabled={ttsEnabled}
+              />
+            )}
 
-          {activeTab === 'grammar' && (
-            <GrammarLab onAskTutor={handleAskTutor} />
-          )}
+            {activeTab === 'grammar' && (
+              <GrammarLab onAskTutor={handleAskTutor} />
+            )}
 
-          {activeTab === 'flashcards' && (
-            <FlashcardMode
-              selectedUnit={selectedUnit}
-              setSelectedUnit={setSelectedUnit}
-              onAskTutor={handleAskTutor}
-            />
-          )}
+            {activeTab === 'flashcards' && (
+              <FlashcardMode
+                selectedUnit={selectedUnit}
+                setSelectedUnit={setSelectedUnit}
+                onAskTutor={handleAskTutor}
+              />
+            )}
 
-          {activeTab === 'vocab-game' && (
-            <VocabBattleGame onAskTutor={handleAskTutor} />
-          )}
+            {activeTab === 'vocab-game' && (
+              <VocabBattleGame onAskTutor={handleAskTutor} />
+            )}
 
-          {activeTab === 'exam' && (
-            <ExamSimulator onAskTutor={handleAskTutor} />
-          )}
+            {activeTab === 'exam' && (
+              <ExamSimulator onAskTutor={handleAskTutor} />
+            )}
 
-          {activeTab === 'writing' && (
-            <WritingSpeakingLab
-              selectedUnit={selectedUnit}
-              onAskTutor={handleAskTutor}
-            />
-          )}
+            {activeTab === 'writing' && (
+              <WritingSpeakingLab
+                selectedUnit={selectedUnit}
+                onAskTutor={handleAskTutor}
+              />
+            )}
 
-          {activeTab === 'diagnostic' && (
-            <DiagnosticStudio onAskTutor={handleAskTutor} />
-          )}
+            {activeTab === 'diagnostic' && (
+              <DiagnosticStudio onAskTutor={handleAskTutor} />
+            )}
+          </Suspense>
         </main>
 
         {/* Persistent Footer */}

@@ -231,10 +231,10 @@ export const WritingSpeakingLab: React.FC<WritingSpeakingLabProps> = ({ selected
             </p>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-wrap sm:flex-nowrap gap-2 overflow-x-auto no-scrollbar">
             <button
               onClick={() => setActiveTab('writing')}
-              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border ${
+              className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border whitespace-nowrap ${
                 activeTab === 'writing' ? 'bg-indigo-600 text-white border-indigo-400 shadow-md' : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-white'
               }`}
             >
@@ -242,7 +242,7 @@ export const WritingSpeakingLab: React.FC<WritingSpeakingLabProps> = ({ selected
             </button>
             <button
               onClick={() => setActiveTab('speaking')}
-              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border ${
+              className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border whitespace-nowrap ${
                 activeTab === 'speaking' ? 'bg-indigo-600 text-white border-indigo-400 shadow-md' : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-white'
               }`}
             >
@@ -250,7 +250,7 @@ export const WritingSpeakingLab: React.FC<WritingSpeakingLabProps> = ({ selected
             </button>
             <button
               onClick={() => setActiveTab('pronunciation')}
-              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border ${
+              className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border whitespace-nowrap ${
                 activeTab === 'pronunciation' ? 'bg-indigo-600 text-white border-indigo-400 shadow-md' : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-white'
               }`}
             >
@@ -339,7 +339,7 @@ export const WritingSpeakingLab: React.FC<WritingSpeakingLabProps> = ({ selected
                   {feedback.overallComments}
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center text-xs">
+                <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 text-center text-xs">
                   {Object.entries(feedback.criteria).map(([key, val]) => (
                     <div key={key} className="p-2 bg-slate-950 rounded-xl border border-slate-800">
                       <span className="text-[10px] text-slate-400 uppercase block font-bold">{key}</span>

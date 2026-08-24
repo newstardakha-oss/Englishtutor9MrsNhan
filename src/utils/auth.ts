@@ -22,7 +22,7 @@ const SAMPLE_STUDENTS: StudentProfile[] = [
     schoolName: 'THCS Chu Văn An',
     wardCommune: 'Thị trấn Đắk Hà',
     username: 'vanminh9a1',
-    passwordHash: '123456',
+    passwordHash: '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',
     createdAt: '01/08/2026',
     lastActiveAt: new Date().toLocaleString('vi-VN'),
     totalStudyMinutes: 145,
@@ -37,7 +37,7 @@ const SAMPLE_STUDENTS: StudentProfile[] = [
     schoolName: 'THCS Chu Văn An',
     wardCommune: 'Xã Đắk Hring',
     username: 'thaotran9a2',
-    passwordHash: '123456',
+    passwordHash: '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',
     createdAt: '02/08/2026',
     lastActiveAt: new Date().toLocaleString('vi-VN'),
     totalStudyMinutes: 190,
@@ -52,7 +52,7 @@ const SAMPLE_STUDENTS: StudentProfile[] = [
     schoolName: 'THCS Đắk Mar',
     wardCommune: 'Xã Đắk Mar',
     username: 'hoangnam9b',
-    passwordHash: '123456',
+    passwordHash: '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',
     createdAt: '03/08/2026',
     lastActiveAt: new Date().toLocaleString('vi-VN'),
     totalStudyMinutes: 98,
@@ -67,7 +67,7 @@ const SAMPLE_STUDENTS: StudentProfile[] = [
     schoolName: 'THCS Chu Văn An',
     wardCommune: 'Thị trấn Đắk Hà',
     username: 'baongoc9a1',
-    passwordHash: '123456',
+    passwordHash: '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',
     createdAt: '04/08/2026',
     lastActiveAt: new Date().toLocaleString('vi-VN'),
     totalStudyMinutes: 210,
@@ -175,12 +175,12 @@ export const logoutStudent = () => {
   setCurrentStudent(null);
 };
 
-export const resetStudentPasswordByTeacher = (username: string, newPassword: string): boolean => {
+export const resetStudentPasswordByTeacher = async (username: string, newPassword: string): Promise<boolean> => {
   const students = getAllStudents();
   const student = students.find(s => s.username.toLowerCase() === username.trim().toLowerCase());
   if (!student) return false;
 
-  student.passwordHash = newPassword.trim();
+  student.passwordHash = await hashPassword(newPassword.trim());
   saveAllStudents(students);
   return true;
 };
