@@ -2,7 +2,7 @@ import 'dotenv/config';
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
-import { executeGeminiWithPool } from "./api/tutor/_pool";
+import { executeGeminiWithPool, executeGeminiWithModelFallback } from "./api/tutor/_pool";
 
 const app = express();
 const PORT = parseInt(process.env.PORT || '3000', 10);
@@ -65,6 +65,7 @@ app.post("/api/tutor/chat", async (req, res) => {
   try {
     const { message, conversationHistory, unitContext } = req.body;
     const clientApiKey = req.headers['x-gemini-api-key'] as string | undefined;
+    const clientModel = req.headers['x-gemini-model'] as string | undefined;
 
     let promptContext = TUTOR_SYSTEM_PROMPT;
     if (unitContext) {
@@ -85,7 +86,7 @@ app.post("/api/tutor/chat", async (req, res) => {
       parts: [{ text: message }]
     });
 
-    const replyText = await executeGeminiWithPool(async (ai, model) => {
+    const replyText = await executeGeminiWithModelFallback(async (ai, model) => {
       const response = await ai.models.generateContent({
         model: model,
         contents: contents,
@@ -95,7 +96,7 @@ app.post("/api/tutor/chat", async (req, res) => {
         }
       });
       return response.text;
-    }, 'gemini-2.5-flash', clientApiKey);
+    }, clientModel || 'gemini-2.5-flash', clientApiKey);
 
     res.json({ reply: replyText });
   } catch (error: any) {
@@ -109,6 +110,7 @@ app.post("/api/tutor/grade-writing", async (req, res) => {
   try {
     const { topic, studentSubmission } = req.body;
     const clientApiKey = req.headers['x-gemini-api-key'] as string | undefined;
+    const clientModel = req.headers['x-gemini-model'] as string | undefined;
 
     const writingPrompt = `
 Hãy chấm và sửa bài viết Tiếng Anh Lớp 9 sau đây theo tiêu chuẩn định hướng Thi vào Lớp 10:
@@ -145,7 +147,7 @@ Yêu cầu đầu ra dạng JSON với cấu trúc chuẩn:
 }
 `;
 
-    const parsedJson = await executeGeminiWithPool(async (ai, model) => {
+    const parsedJson = await executeGeminiWithModelFallback(async (ai, model) => {
       const response = await ai.models.generateContent({
         model: model,
         contents: writingPrompt,
@@ -155,7 +157,7 @@ Yêu cầu đầu ra dạng JSON với cấu trúc chuẩn:
         }
       });
       return JSON.parse(response.text || "{}");
-    }, 'gemini-2.5-flash', clientApiKey);
+    }, clientModel || 'gemini-2.5-flash', clientApiKey);
 
     res.json(parsedJson);
   } catch (error: any) {
@@ -169,6 +171,7 @@ app.post("/api/tutor/diagnostic", async (req, res) => {
   try {
     const { quizResults } = req.body;
     const clientApiKey = req.headers['x-gemini-api-key'] as string | undefined;
+    const clientModel = req.headers['x-gemini-model'] as string | undefined;
 
     const prompt = `
 Phân tích kết quả bài kiểm tra chẩn đoán Tiếng Anh Lớp 9 của học sinh:
@@ -189,7 +192,7 @@ Hãy đưa ra danh sách lỗ hổng kiến thức (#LOHONG) và lộ trình kh�
 }
 `;
 
-    const parsedJson = await executeGeminiWithPool(async (ai, model) => {
+    const parsedJson = await executeGeminiWithModelFallback(async (ai, model) => {
       const response = await ai.models.generateContent({
         model: model,
         contents: prompt,
@@ -199,7 +202,7 @@ Hãy đưa ra danh sách lỗ hổng kiến thức (#LOHONG) và lộ trình kh�
         }
       });
       return JSON.parse(response.text || "{}");
-    }, 'gemini-2.5-flash', clientApiKey);
+    }, clientModel || 'gemini-2.5-flash', clientApiKey);
 
     res.json(parsedJson);
   } catch (error: any) {
@@ -213,6 +216,7 @@ app.post("/api/tutor/lesson-teach", async (req, res) => {
   try {
     const { unitId, lessonStep, studentResponses, unitTitle } = req.body;
     const clientApiKey = req.headers['x-gemini-api-key'] as string | undefined;
+    const clientModel = req.headers['x-gemini-model'] as string | undefined;
 
     const LESSON_SYSTEM_PROMPT = `
 Bạn là Gia Sư Tiếng Anh Lớp 9 chuyên giảng bài theo từng Unit SGK Global Success 9.
@@ -239,14 +243,14 @@ Giữ giọng điệu thân thiện, động viên, phù hợp học sinh 14-15 
     }
     contents.push({ role: 'user', parts: [{ text: stepInstruction }] });
 
-    const replyText = await executeGeminiWithPool(async (ai, model) => {
+    const replyText = await executeGeminiWithModelFallback(async (ai, model) => {
       const response = await ai.models.generateContent({
         model: model,
         contents,
         config: { systemInstruction: LESSON_SYSTEM_PROMPT, temperature: 0.7 }
       });
       return response.text;
-    }, 'gemini-2.5-flash', clientApiKey);
+    }, clientModel || 'gemini-2.5-flash', clientApiKey);
 
     res.json({ reply: replyText });
   } catch (error: any) {
@@ -260,6 +264,7 @@ app.post("/api/tutor/assess-speaking", async (req, res) => {
   try {
     const { targetSentence, recognizedText, unitId } = req.body;
     const clientApiKey = req.headers['x-gemini-api-key'] as string | undefined;
+    const clientModel = req.headers['x-gemini-model'] as string | undefined;
 
     const unitContext = unitId ? `Unit ${unitId} SGK Global Success 9` : '';
     const prompt = `
@@ -279,14 +284,14 @@ ${unitContext}
 }
 `;
 
-    const parsedJson = await executeGeminiWithPool(async (ai, model) => {
+    const parsedJson = await executeGeminiWithModelFallback(async (ai, model) => {
       const response = await ai.models.generateContent({
         model: model,
         contents: prompt,
         config: { responseMimeType: 'application/json', temperature: 0.3 }
       });
       return JSON.parse(response.text || '{}');
-    }, 'gemini-2.5-flash', clientApiKey);
+    }, clientModel || 'gemini-2.5-flash', clientApiKey);
 
     res.json(parsedJson);
   } catch (error: any) {

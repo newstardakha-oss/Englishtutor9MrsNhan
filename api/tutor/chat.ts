@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { executeGeminiWithPool } from './_pool.js';
+import { executeGeminiWithModelFallback } from './_pool.js';
 
 const TUTOR_SYSTEM_PROMPT = `
 Bạn là Gia sư Tiếng Anh Lớp 9 chuyên nghiệp, tận tâm, dạy bám sát sách giáo khoa SGK Global Success Tiếng Anh 9 (Bộ Giáo Dục và Đào Tạo Việt Nam) và định hướng ôn thi vào lớp 10 THPT.
@@ -58,7 +58,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
 
     const clientApiKey = (req.headers['x-gemini-api-key'] as string) || undefined;
-    const replyText = await executeGeminiWithPool(async (ai, model) => {
+    const clientModel = (req.headers['x-gemini-model'] as string) || undefined;
+    const replyText = await executeGeminiWithModelFallback(async (ai, model) => {
       const response = await ai.models.generateContent({
         model: model,
         contents: contents,
@@ -68,7 +69,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
       });
       return response.text;
-    }, 'gemini-2.5-flash', clientApiKey);
+    }, clientModel || 'gemini-2.5-flash', clientApiKey);
 
     return res.status(200).json({ reply: replyText });
   } catch (error: any) {

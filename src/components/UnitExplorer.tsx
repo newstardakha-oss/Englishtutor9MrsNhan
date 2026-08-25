@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { BookOpen, Sparkles, Volume2, HelpCircle, CheckCircle2, ChevronRight, Zap, Award, ArrowRight, Star } from 'lucide-react';
 import { UNITS_DATA, CORE_VOCABULARY, GRAMMAR_TOPICS, PRONUNCIATION_GUIDES, SGK_SAMPLE_EXERCISES } from '../data/sgkData';
+import { apiPost, getErrorMessage } from '../utils/apiClient';
 
 interface UnitExplorerProps {
   selectedUnit: number;
@@ -41,17 +42,12 @@ export const UnitExplorer: React.FC<UnitExplorerProps> = ({
         newHistory.push({ role: 'user', text: userMessage });
       }
       
-      const res = await fetch('/api/tutor/lesson-teach', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          unitId: selectedUnit,
-          unitTitle: unitInfo?.title || `Unit ${selectedUnit}`,
-          lessonStep: step,
-          studentResponses: newHistory.slice(-10),
-        }),
+      const data = await apiPost<{ reply?: string; error?: string }>('/api/tutor/lesson-teach', {
+        unitId: selectedUnit,
+        unitTitle: unitInfo?.title || `Unit ${selectedUnit}`,
+        lessonStep: step,
+        studentResponses: newHistory.slice(-10),
       });
-      const data = await res.json();
       if (data.reply) {
         setLessonContent(data.reply);
         newHistory.push({ role: 'model', text: data.reply });
@@ -60,7 +56,9 @@ export const UnitExplorer: React.FC<UnitExplorerProps> = ({
         setLessonContent(`⚠️ ${data.error}`);
       }
     } catch (err) {
-      setLessonContent('⚠️ Không thể kết nối với Gia Sư AI. Vui lòng thử lại.');
+      console.error(err);
+      const errorInfo = getErrorMessage(err);
+      setLessonContent(errorInfo.message);
     } finally {
       setLessonLoading(false);
     }

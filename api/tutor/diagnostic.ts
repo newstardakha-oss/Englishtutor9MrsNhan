@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { executeGeminiWithPool } from './_pool.js';
+import { executeGeminiWithModelFallback } from './_pool.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -29,7 +29,8 @@ Hãy đưa ra danh sách lỗ hổng kiến thức (#LOHONG) và lộ trình kh�
 `;
 
     const clientApiKey = (req.headers['x-gemini-api-key'] as string) || undefined;
-    const parsedJson = await executeGeminiWithPool(async (ai, model) => {
+    const clientModel = (req.headers['x-gemini-model'] as string) || undefined;
+    const parsedJson = await executeGeminiWithModelFallback(async (ai, model) => {
       const response = await ai.models.generateContent({
         model: model,
         contents: prompt,
@@ -39,7 +40,7 @@ Hãy đưa ra danh sách lỗ hổng kiến thức (#LOHONG) và lộ trình kh�
         }
       });
       return JSON.parse(response.text || "{}");
-    }, 'gemini-2.5-flash', clientApiKey);
+    }, clientModel || 'gemini-2.5-flash', clientApiKey);
 
     return res.status(200).json(parsedJson);
   } catch (error: any) {

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import {
   BookOpen, Bot, Award, Sparkles, AlertCircle, FileText, Zap, Volume2, VolumeX,
-  Swords, Menu, X, ChevronRight, User, ShieldCheck, Trophy, LogOut, Flame, Star, Target
+  Swords, Menu, X, ChevronRight, User, ShieldCheck, Trophy, LogOut, Flame, Star, Target, Settings
 } from 'lucide-react';
 import { StudentProfile } from '../types';
+import { hasStoredApiKey } from '../utils/apiKeyManager';
 
 interface NavbarProps {
   activeTab: string;
@@ -16,6 +17,7 @@ interface NavbarProps {
   onOpenAuthModal: () => void;
   onOpenLeaderboardModal: () => void;
   onOpenTeacherAdminPortal: () => void;
+  onOpenApiKeyModal: () => void;
   onLogoutStudent: () => void;
 }
 
@@ -30,6 +32,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenAuthModal,
   onOpenLeaderboardModal,
   onOpenTeacherAdminPortal,
+  onOpenApiKeyModal,
   onLogoutStudent,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -276,6 +279,24 @@ export const Navbar: React.FC<NavbarProps> = ({
                 {ttsEnabled ? '🔊 Bật âm thanh' : '🔇 Tắt âm thanh'}
               </button>
             </div>
+
+            <button
+              onClick={() => { onOpenApiKeyModal(); setMobileMenuOpen(false); }}
+              className={`w-full flex items-center justify-between pt-1.5 border-t border-slate-800 px-0.5 py-1.5 rounded-lg transition-colors hover:bg-slate-800/50 ${
+                hasStoredApiKey() ? 'text-emerald-300' : 'text-rose-300'
+              }`}
+            >
+              <span className="font-medium text-slate-400 flex items-center gap-1.5">
+                <Settings className="w-3.5 h-3.5" /> Cài đặt API:
+              </span>
+              <span className={`px-2 py-0.5 rounded-lg text-[11px] font-bold border ${
+                hasStoredApiKey()
+                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                  : 'bg-rose-500/20 text-rose-300 border-rose-500/40 animate-pulse'
+              }`}>
+                {hasStoredApiKey() ? '✓ Đã có Key' : '⚠ Chưa có Key'}
+              </span>
+            </button>
           </div>
 
           {/* Navigation List */}

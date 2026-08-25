@@ -32,7 +32,7 @@ function safeErrorMessage(err: any): string {
   }
 }
 
-export const MODEL_FALLBACK_CHAIN = ['gemini-2.5-flash', 'gemini-3-flash-preview', 'gemini-2.5-flash-lite'];
+export const MODEL_FALLBACK_CHAIN = ['gemini-2.5-flash', 'gemini-3-flash-preview', 'gemini-2.5-flash-lite', 'gemini-2.5-pro'];
 
 export async function executeGeminiWithPool<T>(
   fn: (ai: GoogleGenAI, model: string) => Promise<T>,
@@ -104,29 +104,27 @@ export async function executeGeminiWithPool<T>(
 }
 
 export async function executeGeminiWithModelFallback<T>(
-  fn: (ai: GoogleGenAI, model: string) => Promise<T>
+  fn: (ai: GoogleGenAI, model: string) => Promise<T>,
+  preferredModel?: string,
+  clientApiKey?: string
 ): Promise<T> {
+  // Build chain starting with preferred model if specified
+  const chain = preferredModel && !MODEL_FALLBACK_CHAIN.includes(preferredModel)
+    ? [preferredModel, ...MODEL_FALLBACK_CHAIN]
+    : preferredModel
+    ? [preferredModel, ...MODEL_FALLBACK_CHAIN.filter(m => m !== preferredModel)]
+    : [...MODEL_FALLBACK_CHAIN];
+
   let lastError: any = null;
   
-  for (const model of MODEL_FALLBACK_CHAIN) {
+  for (const model of chain) {
     try {
-      return await executeGeminiWithPool(fn, model);
+      return await executeGeminiWithPool(fn, model, clientApiKey);
     } catch (err: any) {
       const errMsg = safeErrorMessage(err);
-      
-      const isQuotaError = errMsg.includes('429') ||
-        errMsg.includes('quota') ||
-        errMsg.includes('RESOURCE_EXHAUSTED') ||
-        errMsg.includes('limit') ||
-        errMsg.includes('rate');
-
-      if (!isQuotaError) {
-        console.warn(`[Model Fallback] Model ${model} failed, trying next. Error: ${errMsg.substring(0, 200)}`);
-        lastError = err;
-        continue;
-      }
-      
-      throw err;
+      console.warn(`[Model Fallback] Model ${model} failed, trying next. Error: ${errMsg.substring(0, 200)}`);
+      lastError = err;
+      continue;
     }
   }
   

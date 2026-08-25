@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FileText, Mic, Sparkles, CheckCircle2, AlertCircle, Award, ArrowRight, Volume2, HelpCircle, Send } from 'lucide-react';
 import { WritingFeedback } from '../types';
+import { apiPost, getErrorMessage } from '../utils/apiClient';
 
 interface WritingSpeakingLabProps {
   selectedUnit: number;
@@ -63,24 +64,18 @@ export const WritingSpeakingLab: React.FC<WritingSpeakingLabProps> = ({ selected
     setFeedback(null);
 
     try {
-      const res = await fetch('/api/tutor/grade-writing', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          topic,
-          studentSubmission: studentText,
-          targetWords: '80-100'
-        })
+      const data = await apiPost<WritingFeedback>('/api/tutor/grade-writing', {
+        topic,
+        studentSubmission: studentText,
+        targetWords: '80-100'
       });
-
-      if (!res.ok) throw new Error('Không thể chấm bài viết');
-      const data = await res.json();
       setFeedback(data);
     } catch (err) {
       console.error(err);
+      const errorInfo = getErrorMessage(err);
       setFeedback({
         score: 8.5,
-        overallComments: 'Bài viết của em đáp ứng rất tốt yêu cầu đề bài. Bố cục mạch lạc, phát triển ý sinh động.',
+        overallComments: `${errorInfo.message}\n\nBài viết của em đáp ứng rất tốt yêu cầu đề bài. Bố cục mạch lạc, phát triển ý sinh động.`,
         strengths: ['Đủ 3 phần: Mở đoạn, Thân đoạn và Kết đoạn', 'Dùng đúng các từ vựng chủ đề SGK Unit 1'],
         weaknesses: ['Cần chú ý thêm từ nối (In addition, Therefore) để đoạn văn tự nhiên hơn'],
         criteria: {
@@ -192,23 +187,20 @@ export const WritingSpeakingLab: React.FC<WritingSpeakingLabProps> = ({ selected
     if (!pronTarget || !pronRecognized) return;
     setPronLoading(true);
     try {
-      const res = await fetch('/api/tutor/assess-speaking', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          targetSentence: pronTarget,
-          recognizedText: pronRecognized,
-          unitId: selectedUnit,
-        }),
+      const data = await apiPost('/api/tutor/assess-speaking', {
+        targetSentence: pronTarget,
+        recognizedText: pronRecognized,
+        unitId: selectedUnit,
       });
-      const data = await res.json();
       if (data.error) {
         alert(data.error);
       } else {
         setPronResult(data);
       }
     } catch (err) {
-      alert('Không thể kết nối AI. Vui lòng thử lại.');
+      console.error(err);
+      const errorInfo = getErrorMessage(err);
+      alert(errorInfo.message);
     } finally {
       setPronLoading(false);
     }

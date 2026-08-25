@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, Sparkles, Volume2, HelpCircle, FileText, Image, RefreshCw, Zap, CheckCircle2, ArrowRight, ShieldAlert, BookOpen } from 'lucide-react';
 import { ChatMessage } from '../types';
 import { UNITS_DATA, SGK_SAMPLE_EXERCISES } from '../data/sgkData';
+import { apiPost, getErrorMessage } from '../utils/apiClient';
 
 interface TutorChatProps {
   selectedUnit: number;
@@ -90,19 +91,12 @@ export const TutorChat: React.FC<TutorChatProps> = ({ selectedUnit, setSelectedU
     setLoading(true);
 
     try {
-      const response = await fetch('/api/tutor/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: fullUserText,
-          unitContext: selectedUnit,
-          conversationHistory: updatedHistory.slice(-8)
-        })
+      const data = await apiPost('/api/tutor/chat', {
+        message: fullUserText,
+        unitContext: selectedUnit,
+        conversationHistory: updatedHistory.slice(-8)
       });
 
-      if (!response.ok) throw new Error('Không thể kết nối với server gia sư AI');
-
-      const data = await response.json();
       const tutorReply = data.reply || 'Thầy gặp chút gián đoạn kết nối AI. Em thử gửi lại câu hỏi nhé!';
 
       const tutorMsg: ChatMessage = {
@@ -119,12 +113,13 @@ export const TutorChat: React.FC<TutorChatProps> = ({ selectedUnit, setSelectedU
       }
     } catch (err: any) {
       console.error(err);
+      const errorInfo = getErrorMessage(err);
       setMessages(prev => [
         ...prev,
         {
           id: (Date.now() + 1).toString(),
           sender: 'tutor',
-          text: 'Thầy vừa gặp sự cố kết nối mạng. Em hãy bấm nút gửi lại câu hỏi giúp thầy nhé!',
+          text: errorInfo.message,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         }
       ]);

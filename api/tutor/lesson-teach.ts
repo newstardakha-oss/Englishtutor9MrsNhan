@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { executeGeminiWithPool } from './_pool.js';
+import { executeGeminiWithModelFallback } from './_pool.js';
 
 const LESSON_SYSTEM_PROMPT = `
 Bạn là Gia Sư Tiếng Anh Lớp 9 chuyên giảng bài theo từng Unit SGK Global Success 9.
@@ -82,7 +82,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     contents.push({ role: 'user', parts: [{ text: stepInstruction }] });
 
     const clientApiKey = (req.headers['x-gemini-api-key'] as string) || undefined;
-    const replyText = await executeGeminiWithPool(async (ai, model) => {
+    const clientModel = (req.headers['x-gemini-model'] as string) || undefined;
+    const replyText = await executeGeminiWithModelFallback(async (ai, model) => {
       const response = await ai.models.generateContent({
         model: model,
         contents: contents,
@@ -92,7 +93,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
       });
       return response.text;
-    }, 'gemini-2.5-flash', clientApiKey);
+    }, clientModel || 'gemini-2.5-flash', clientApiKey);
 
     return res.status(200).json({ reply: replyText });
   } catch (error: any) {

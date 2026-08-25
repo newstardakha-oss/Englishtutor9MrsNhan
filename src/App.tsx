@@ -11,10 +11,12 @@ import { Navbar } from './components/Navbar';
 import { StudentAuthModal } from './components/StudentAuthModal';
 import { StudentLeaderboardModal } from './components/StudentLeaderboardModal';
 import { TeacherAdminPortal } from './components/TeacherAdminPortal';
+import { ApiKeySettingsModal } from './components/ApiKeySettingsModal';
 import { LoginPage } from './components/LoginPage';
 import { getCurrentStudent, logoutStudent, updateStudentProgress, getCurrentTeacher, logoutTeacher } from './utils/auth';
+import { hasStoredApiKey } from './utils/apiKeyManager';
 import { StudentProfile } from './types';
-import { Sparkles, Award } from 'lucide-react';
+import { Sparkles, Award, Settings } from 'lucide-react';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<string>('chat');
@@ -28,6 +30,7 @@ export default function App() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [leaderboardModalOpen, setLeaderboardModalOpen] = useState(false);
   const [teacherAdminPortalOpen, setTeacherAdminPortalOpen] = useState(false);
+  const [apiKeyModalOpen, setApiKeyModalOpen] = useState(false);
 
 
 
@@ -102,6 +105,7 @@ export default function App() {
         onOpenAuthModal={() => setAuthModalOpen(true)}
         onOpenLeaderboardModal={() => setLeaderboardModalOpen(true)}
         onOpenTeacherAdminPortal={() => setTeacherAdminPortalOpen(true)}
+        onOpenApiKeyModal={() => setApiKeyModalOpen(true)}
         onLogoutStudent={handleLogout}
       />
 
@@ -140,6 +144,18 @@ export default function App() {
                 🔑 Đăng Nhập Học Sinh
               </button>
             )}
+
+            <button
+                onClick={() => setApiKeyModalOpen(true)}
+                className={`flex items-center gap-1 font-bold px-2 py-0.5 sm:px-3 sm:py-1 rounded-xl text-[10px] sm:text-xs transition-colors border ${
+                  hasStoredApiKey()
+                    ? 'bg-emerald-950/80 text-emerald-300 border-emerald-500/40 hover:bg-emerald-900/80'
+                    : 'bg-rose-950/80 text-rose-300 border-rose-500/40 hover:bg-rose-900/80 animate-pulse'
+                }`}
+              >
+                <Settings className="w-3 h-3" />
+                <span>{hasStoredApiKey() ? 'API ✓' : 'Lấy API key'}</span>
+              </button>
 
             <div className="flex items-center gap-1 text-cyan-300 font-bold bg-indigo-950/80 px-2 py-0.5 sm:px-3 sm:py-1 rounded-xl border border-indigo-500/40 text-[10px] sm:text-xs">
               <Sparkles className="w-3 h-3 text-cyan-400" />
@@ -243,6 +259,11 @@ export default function App() {
       <TeacherAdminPortal
         isOpen={teacherAdminPortalOpen}
         onClose={() => setTeacherAdminPortalOpen(false)}
+      />
+
+      <ApiKeySettingsModal
+        isOpen={apiKeyModalOpen}
+        onClose={() => setApiKeyModalOpen(false)}
       />
     </div>
   );

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { AlertCircle, CheckCircle2, Sparkles, RefreshCw, ArrowRight, Zap, BookOpen, ShieldAlert } from 'lucide-react';
 import { LearningGap } from '../types';
+import { apiPost, getErrorMessage } from '../utils/apiClient';
 
 interface DiagnosticStudioProps {
   onAskTutor: (q: string) => void;
@@ -54,17 +55,11 @@ export const DiagnosticStudio: React.FC<DiagnosticStudioProps> = ({ onAskTutor }
         correctAns: q.correct
       }));
 
-      const res = await fetch('/api/tutor/diagnostic', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ quizResults })
-      });
-
-      if (!res.ok) throw new Error('Không thể chạy chẩn đoán');
-      const data = await res.json();
+      const data = await apiPost<{ gaps: LearningGap[]; summaryRoadmap: string }>('/api/tutor/diagnostic', { quizResults });
       setReport(data);
     } catch (err) {
       console.error(err);
+      const errorInfo = getErrorMessage(err);
       setReport({
         gaps: [
           {
@@ -88,7 +83,7 @@ export const DiagnosticStudio: React.FC<DiagnosticStudioProps> = ({ onAskTutor }
             ]
           }
         ],
-        summaryRoadmap: 'Ôn tập tập trung 2 tuần tới: Ưu tiên củng cố 1) Lùi thì câu gián tiếp, 2) Phrasal verbs Unit 1 & 2, 3) Luyện viết lại câu Mệnh đề quan hệ không dùng THAT khi có dấu phẩy.'
+        summaryRoadmap: `${errorInfo.message}\n\n(Lộ trình mẫu tham khảo): Ôn tập tập trung 2 tuần tới: Ưu tiên củng cố 1) Lùi thì câu gián tiếp, 2) Phrasal verbs Unit 1 & 2, 3) Luyện viết lại câu Mệnh đề quan hệ không dùng THAT khi có dấu phẩy.`
       });
     } finally {
       setLoading(false);
